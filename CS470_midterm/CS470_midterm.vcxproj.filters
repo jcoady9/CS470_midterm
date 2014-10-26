@@ -108,4 +108,17 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="basicfx.fx">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Meshes\chair.m3d">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Meshes\table.m3d">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

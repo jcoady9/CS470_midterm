@@ -1,14 +1,26 @@
+#include "d3dApp.h"
+#include "d3dx11Effect.h"
+#include "GeometryGenerator.h"
+#include "MathHelper.h"
+#include "LightHelper.h"
+#include "Effects.h"
+#include "Vertex.h"
+//#include "RenderStates.h"
+#include "Waves.h"
+#include "MeshGeometry.h"
+
 #include "World.h"
 
 // Class methods
-World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertexLayout(0), mFXMatVar(0), mCameraPos(0.0f, 0.0f, 0.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(80.0f)
-
+World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertexLayout(0), mFXMatVar(0), mTableVB(0), mTableIB(0),
+mCameraPos(0.0f, 0.0f, 0.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(80.0f)
 {
 	// Change the window caption
 	mMainWndCaption = L"Midterm Project";
 
 	// Initialize matricies to identirty matrix
 	XMMATRIX iMatrix = XMMatrixIdentity();
+
 	XMStoreFloat4x4(&mView, iMatrix);
 	XMStoreFloat4x4(&mProj, iMatrix);
 	XMStoreFloat4x4(&mWVP, iMatrix);
@@ -28,6 +40,8 @@ World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertex
 
 World::~World()
 {
+	ReleaseCOM(mTableVB);
+	ReleaseCOM(mTableIB);
 	ReleaseCOM(mFX);
 	ReleaseCOM(mVertexLayout);
 };
@@ -42,8 +56,12 @@ bool World::Init()
 	mTableMesh.Init(md3dDevice, mTableMeshFilename);
 	//mTableMesh.Init(md3dDevice, mChairMeshFilename);
 
+	//XMMATRIX tableScale = XMMatrixScaling(500.0f, 500.0f, 500.0f);
+	//XMStoreFloat4x4(&mTableMesh.World, tableScale);
+
+
 	// Create effect and vertex layout
-	mFXFileName = L"basicfx.fx";
+	mShaderFilename = L"basicfx.fx";
 	buildFX();
 	buildVertexLayouts();
 
@@ -58,6 +76,8 @@ bool World::Init()
 
 	XMMATRIX camera = XMMatrixLookAtLH(e, a, u);
 	XMStoreFloat4x4(&mView, camera);
+
+	buildBuffers();
 
 	return true;
 }
@@ -74,11 +94,9 @@ void World::OnResize()
 
 void World::UpdateScene(float dt){
 
-	//scale the table
-	XMMATRIX table = XMLoadFloat4x4(&mTableMesh.World);
-	XMMATRIX tableScale = XMMatrixScaling(10.0f, 10.0f, 10.0f);
-	table = table * tableScale;
-	XMStoreFloat4x4(&mTableMesh.World, table);
+	XMMATRIX iMatrix = XMMatrixIdentity();
+	XMMATRIX scale = XMMatrixScaling(10.0f, 10.0f, 10.0f);
+	iMatrix = iMatrix * scale;
 
 	// Convert Spherical to Cartesian coordinates.
 	float x = mRadius*sinf(mPhi)*cosf(mTheta);
@@ -102,6 +120,9 @@ void World::DrawScene(){
 	assert(md3dImmediateContext);
 	assert(mSwapChain);
 
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
 	// Simply clear render view to blue
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 
@@ -111,10 +132,12 @@ void World::DrawScene(){
 	// TODO: Set input layout to object vertices
 	md3dImmediateContext->IASetInputLayout(mVertexLayout);
 
+
 	// TODO: Compute total modelview-projection matrix
 	XMMATRIX v = XMLoadFloat4x4(&mView);
 	XMMATRIX p = XMLoadFloat4x4(&mProj);
 	XMMATRIX VP = v*p;
+
 
 	//Get technique and loop over passes
 	D3DX11_TECHNIQUE_DESC td;
@@ -132,22 +155,6 @@ void World::DrawScene(){
 		}
 	}
 
-
-	/*
-	mTech->GetDesc(&td);
-	for (UINT p = 0; p < td.Passes; p++){
-	// Set modelview projection matrix for object
-	XMMATRIX chair = XMLoadFloat4x4(&mChairMesh.World);
-	XMMATRIX wvp = chair*VP;
-	mFXMatVar->SetMatrix(reinterpret_cast<float*>(&VP));
-	// Draw subsets
-	for (UINT subset = 0; subset < mChairMesh.SubsetCount; ++subset){
-	mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-
-	mTableMesh.MeshData.Draw(md3dImmediateContext, subset);
-	}
-	}
-	*/
 	// Swap back buffer
 	HR(mSwapChain->Present(0, 0));
 };
@@ -166,7 +173,7 @@ void World::buildFX()
 	// Load effects file
 	ID3D10Blob* shader = 0;
 	ID3D10Blob* compilationErrors = 0;
-	HRESULT hr = D3DX11CompileFromFile(mFXFileName.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &shader, &compilationErrors, 0);
+	HRESULT hr = D3DX11CompileFromFile(mShaderFilename.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &shader, &compilationErrors, 0);
 
 
 	// Output debug info if compilation failed
@@ -202,6 +209,42 @@ void World::buildVertexLayouts()
 
 void World::buildBuffers(){
 
+	//GeometryGenerator geoGen;
+	//geoGen.CreateBox(1.0f, 1.0f, 1.0f, mesh);
+
+	//
+	// Extract the vertex elements we are interested in and pack the
+	// vertices of all the meshes into one vertex buffer.
+	//
+
+
+
+	D3D11_BUFFER_DESC vbd;
+
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex) * 3;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &mTableMesh.World;
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mTableVB));
+
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
+	
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT)* mTableMesh.Indices.size();
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &mTableMesh.Indices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mTableIB));
+	
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y)

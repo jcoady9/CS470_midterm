@@ -1,5 +1,6 @@
 #include "d3dApp.h"
 #include "M3DMesh.h"
+#include "MeshGeometry.h"
 #include <string>
 
 // Subclass declaration
@@ -33,7 +34,10 @@ private:
 
 
 	XMFLOAT4X4 mTable;
-	XMFLOAT4X4 mTableTransform;
+	//XMFLOAT4X4 mTableTransform;
+
+	ID3D11Buffer* mTableVB;
+	ID3D11Buffer* mTableIB;
 
 	std::string mTableMeshFilename;
 	std::string mChairMeshFilename;
@@ -41,7 +45,7 @@ private:
 
 
 	// Shader variables
-	std::wstring mFXFileName;
+	std::wstring mShaderFilename;
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mTech;
 	ID3DX11EffectMatrixVariable* mFXMatVar;

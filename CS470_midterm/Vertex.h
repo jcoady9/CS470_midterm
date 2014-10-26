@@ -7,6 +7,14 @@ struct MeshVertex {
 	XMFLOAT4 color;
 };
 
+struct Vertex{
+	Vertex(){}
+	Vertex(float x, float y, float z)
+		: pos(x, y, z){}
+
+	XMFLOAT3 pos;
+};
+
 // Create vertex layout description from Vertex structure
 static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{

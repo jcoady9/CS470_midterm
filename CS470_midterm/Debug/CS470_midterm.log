@@ -1,10 +1,10 @@
-﻿Build started 10/25/2014 5:10:46 PM.
-     1>Project "c:\Users\Josh\documents\visual studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" on node 2 (Build target(s)).
+﻿Build started 10/26/2014 6:26:58 PM.
+     1>Project "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
-         main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt World.cpp
+         World.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dx11d.lib D3DCompiler.lib Effects11d.lib dxerr.lib dxgi.lib dxguid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.lib" /MACHINE:X86 Debug\Camera.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dx11d.lib D3DCompiler.lib Effects11d.lib dxerr.lib dxgi.lib dxguid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.lib" /MACHINE:X86 Debug\Camera.obj
          Debug\d3dApp.obj
          Debug\d3dUtil.obj
          Debug\GameTimer.obj
@@ -18,15 +18,9 @@
          Debug\main.obj
          Debug\MeshGeometry.obj
          Debug\World.obj
-     1>Effects11d.lib(d3dxGlobal.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(d3dxGlobal.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-     1>Effects11d.lib(EffectAPI.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectAPI.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-     1>Effects11d.lib(EffectLoad.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectLoad.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-     1>Effects11d.lib(EffectNonRuntime.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectNonRuntime.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-     1>Effects11d.lib(EffectReflection.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectReflection.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-     1>Effects11d.lib(EffectRuntime.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectRuntime.obj)' or at 'c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
-         CS470_midterm.vcxproj -> c:\users\josh\documents\visual studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe
-     1>Done Building Project "c:\Users\Josh\documents\visual studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" (Build target(s)).
+         CS470_midterm.vcxproj -> C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe
+     1>Done Building Project "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.19
+Time Elapsed 00:00:01.10
