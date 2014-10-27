@@ -12,7 +12,7 @@
 #include "World.h"
 
 // Class methods
-World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertexLayout(0), mFXMatVar(0), mTableVB(0), mTableIB(0),
+World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertexLayout(0), mFXMatVar(0), mTableMapSRV(0),
 mCameraPos(0.0f, 0.0f, 0.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(80.0f)
 {
 	// Change the window caption
@@ -40,8 +40,7 @@ mCameraPos(0.0f, 0.0f, 0.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper:
 
 World::~World()
 {
-	ReleaseCOM(mTableVB);
-	ReleaseCOM(mTableIB);
+	ReleaseCOM(mTableMapSRV);
 	ReleaseCOM(mFX);
 	ReleaseCOM(mVertexLayout);
 };
@@ -54,10 +53,6 @@ bool World::Init()
 
 	// initialize mesh objects
 	mTableMesh.Init(md3dDevice, mTableMeshFilename);
-	//mTableMesh.Init(md3dDevice, mChairMeshFilename);
-
-	//XMMATRIX tableScale = XMMatrixScaling(500.0f, 500.0f, 500.0f);
-	//XMStoreFloat4x4(&mTableMesh.World, tableScale);
 
 
 	// Create effect and vertex layout
@@ -77,8 +72,6 @@ bool World::Init()
 	XMMATRIX camera = XMMatrixLookAtLH(e, a, u);
 	XMStoreFloat4x4(&mView, camera);
 
-	buildBuffers();
-
 	return true;
 }
 
@@ -94,10 +87,6 @@ void World::OnResize()
 
 void World::UpdateScene(float dt){
 
-	XMMATRIX iMatrix = XMMatrixIdentity();
-	XMMATRIX scale = XMMatrixScaling(10.0f, 10.0f, 10.0f);
-	iMatrix = iMatrix * scale;
-
 	// Convert Spherical to Cartesian coordinates.
 	float x = mRadius*sinf(mPhi)*cosf(mTheta);
 	float z = mRadius*sinf(mPhi)*sinf(mTheta);
@@ -112,6 +101,10 @@ void World::UpdateScene(float dt){
 
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, V);
+
+
+	XMMATRIX tableScale = XMMatrixScaling(100.0f, 100.0f, 100.0f);
+	XMStoreFloat4x4(&mTableMesh.World, tableScale);
 
 }
 
@@ -205,46 +198,6 @@ void World::buildVertexLayouts()
 	D3DX11_PASS_DESC pd;
 	mTech->GetPassByIndex(0)->GetDesc(&pd);
 	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, pd.pIAInputSignature, pd.IAInputSignatureSize, &mVertexLayout));
-}
-
-void World::buildBuffers(){
-
-	//GeometryGenerator geoGen;
-	//geoGen.CreateBox(1.0f, 1.0f, 1.0f, mesh);
-
-	//
-	// Extract the vertex elements we are interested in and pack the
-	// vertices of all the meshes into one vertex buffer.
-	//
-
-
-
-	D3D11_BUFFER_DESC vbd;
-
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex) * 3;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &mTableMesh.World;
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mTableVB));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-	
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* mTableMesh.Indices.size();
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &mTableMesh.Indices[0];
-	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mTableIB));
-	
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y)

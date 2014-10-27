@@ -26,8 +26,6 @@ private:
 	void buildFX();
 	void buildVertexLayouts();
 
-	void buildBuffers();
-
 	// Cube mesh object
 	M3DMesh mTableMesh;
 	M3DMesh mChairMesh;
@@ -42,7 +40,7 @@ private:
 	std::string mTableMeshFilename;
 	std::string mChairMeshFilename;
 
-
+	ID3D11ShaderResourceView* mTableMapSRV;
 
 	// Shader variables
 	std::wstring mShaderFilename;
