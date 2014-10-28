@@ -25,7 +25,7 @@ private:
 public:
 	// TODO: Mesh data
 	// Local Mesh data copies
-	std::vector<MeshVertex> Vertices;
+	std::vector<Vertex::MeshVertex> Vertices;
 	std::vector<USHORT> Indices;
 	std::vector<MeshGeometry::Subset> Subsets;
 

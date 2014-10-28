@@ -83,9 +83,12 @@
     <ClCompile Include="..\..\..\3DGameProgramming\Common\TextureMgr.cpp" />
     <ClCompile Include="..\..\..\3DGameProgramming\Common\Waves.cpp" />
     <ClCompile Include="..\..\..\3DGameProgramming\Common\xnacollision.cpp" />
+    <ClCompile Include="Effects.cpp" />
     <ClCompile Include="M3DMesh.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshGeometry.cpp" />
+    <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -100,8 +103,10 @@
     <ClInclude Include="..\..\..\3DGameProgramming\Common\TextureMgr.h" />
     <ClInclude Include="..\..\..\3DGameProgramming\Common\Waves.h" />
     <ClInclude Include="..\..\..\3DGameProgramming\Common\xnacollision.h" />
+    <ClInclude Include="Effects.h" />
     <ClInclude Include="M3DMesh.h" />
     <ClInclude Include="MeshGeometry.h" />
+    <ClInclude Include="RenderStates.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>

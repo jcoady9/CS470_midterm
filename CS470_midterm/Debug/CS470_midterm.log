@@ -1,26 +1,10 @@
-﻿Build started 10/27/2014 5:52:33 PM.
+﻿Build started 10/28/2014 12:56:33 PM.
      1>Project "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" on node 2 (Build target(s)).
-     1>FxCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_5_0 /Fo "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\basicfx.cso" /Od /Zi basicfx.fx 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-         
-         compilation object save succeeded; see C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\basicfx.cso
-       ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\3DGameProgramming\Common\Camera.cpp ..\..\..\3DGameProgramming\Common\d3dApp.cpp ..\..\..\3DGameProgramming\Common\d3dUtil.cpp ..\..\..\3DGameProgramming\Common\GameTimer.cpp ..\..\..\3DGameProgramming\Common\GeometryGenerator.cpp ..\..\..\3DGameProgramming\Common\LightHelper.cpp ..\..\..\3DGameProgramming\Common\MathHelper.cpp ..\..\..\3DGameProgramming\Common\TextureMgr.cpp ..\..\..\3DGameProgramming\Common\Waves.cpp ..\..\..\3DGameProgramming\Common\xnacollision.cpp M3DMesh.cpp main.cpp MeshGeometry.cpp World.cpp
-         World.cpp
-         MeshGeometry.cpp
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt M3DMesh.cpp World.cpp main.cpp
          main.cpp
+         World.cpp
          M3DMesh.cpp
-         xnacollision.cpp
-         Waves.cpp
-         TextureMgr.cpp
-         MathHelper.cpp
-         LightHelper.cpp
-         GeometryGenerator.cpp
-         GameTimer.cpp
-         d3dUtil.cpp
-         d3dApp.cpp
-         Camera.cpp
          Generating Code...
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dx11d.lib D3DCompiler.lib Effects11d.lib dxerr.lib dxgi.lib dxguid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.lib" /MACHINE:X86 Debug\Camera.obj
@@ -33,9 +17,12 @@
          Debug\TextureMgr.obj
          Debug\Waves.obj
          Debug\xnacollision.obj
+         Debug\Effects.obj
          Debug\M3DMesh.obj
          Debug\main.obj
          Debug\MeshGeometry.obj
+         Debug\RenderStates.obj
+         Debug\Vertex.obj
          Debug\World.obj
      1>Effects11d.lib(d3dxGlobal.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(d3dxGlobal.obj)' or at 'C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
      1>Effects11d.lib(EffectAPI.obj) : warning LNK4099: PDB 'effects11.pdb' was not found with 'Effects11d.lib(EffectAPI.obj)' or at 'C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\effects11.pdb'; linking object as if no debug info
@@ -48,4 +35,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:09.80
+Time Elapsed 00:00:04.18

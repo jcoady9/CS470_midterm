@@ -113,7 +113,7 @@ void World::DrawScene(){
 	assert(md3dImmediateContext);
 	assert(mSwapChain);
 
-	UINT stride = sizeof(Vertex);
+	UINT stride = sizeof(Vertex::Basic32);
 	UINT offset = 0;
 
 	// Simply clear render view to blue
