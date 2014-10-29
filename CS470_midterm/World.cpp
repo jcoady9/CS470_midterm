@@ -22,8 +22,8 @@
  
 
 World::World(HINSTANCE hInstance)
-: D3DApp(hInstance), mFloorVB(0), mFloorIB(0), mFloorMapSRV(0), mWallVB(0), mWallIB(0), mWallMapSRV(0), mWallVB_2(0), mWallIB_2(0), mWallVB_3(0), mWallIB_3(0), mCameraPos(0.0f, 50.0f, 8.0f),
-  mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(2.5f)
+: D3DApp(hInstance), mFloorVB(0), mFloorIB(0), mFloorMapSRV(0), mWallVB(0), mWallIB(0), mWallMapSRV(0), mWallVB_2(0), mWallIB_2(0), mWallVB_3(0), mWallIB_3(0), mWallVB_4(0), mWallIB_4(0),
+mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(2.5f)
 {
 	mMainWndCaption = L"Crate Demo";
 	
@@ -33,10 +33,11 @@ World::World(HINSTANCE hInstance)
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mFloor, I);
 	XMStoreFloat4x4(&mWall, I);
+	XMStoreFloat4x4(&mWall_2, I);
+	XMStoreFloat4x4(&mWall_3, I);
+	XMStoreFloat4x4(&mWall_4, I);
 	XMStoreFloat4x4(&mFloorTexTransform, I);
 	XMStoreFloat4x4(&mWallTexTransform, I);
-
-
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
 
@@ -47,12 +48,31 @@ World::World(HINSTANCE hInstance)
 	scale = XMMatrixScaling(7.0f, 0.2f, 7.0f);
 	XMStoreFloat4x4(&mFloor, scale);
 
-	//scale back-wall
+	//transform back-wall
 	axis = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	rotate = XMMatrixRotationAxis(axis, 80.0f);
 	translate = XMMatrixTranslation(3.0f, 1.0f, 0.0f);
 	scale = XMMatrixScaling(2.0f, 0.1f, 3.0f);
 	XMStoreFloat4x4(&mWall, scale * rotate * translate);
+
+	//transform wall2
+	axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	rotate = XMMatrixRotationAxis(axis, 80.0f);
+	translate = XMMatrixTranslation(2.0f, 1.0f, 1.5f);
+	scale = XMMatrixScaling(2.0f, 0.1f, 2.0f);
+	XMStoreFloat4x4(&mWall_2, scale * rotate * translate);
+
+	//transform wall3
+	axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	rotate = XMMatrixRotationAxis(axis, 1.57f);
+	translate = XMMatrixTranslation(2.0f, 1.0f, -1.5f);
+	scale = XMMatrixScaling(2.0f, 0.1f, 2.0f);
+	XMStoreFloat4x4(&mWall_3, scale * rotate * translate);
+
+	//transform roof
+	translate = XMMatrixTranslation(2.0f, 2.0f, 0.0f);
+	scale = XMMatrixScaling(2.0f, 0.1f, 3.0f);
+	XMStoreFloat4x4(&mWall_4, scale * translate);
 
 	mDirLights[0].Ambient  = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	mDirLights[0].Diffuse  = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
@@ -82,6 +102,7 @@ World::~World()
 	ReleaseCOM(mWallIB_2);
 	ReleaseCOM(mWallVB_3);
 	ReleaseCOM(mWallIB_3);
+	ReleaseCOM(mWallIB_4);
 	ReleaseCOM(mWallMapSRV);
 	ReleaseCOM(mFloorVB);
 	ReleaseCOM(mFloorIB);
@@ -181,7 +202,7 @@ void World::DrawScene()
 		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
     }
-
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWallVB, &stride, &offset);
@@ -202,6 +223,70 @@ void World::DrawScene()
 		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
 	}
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWallVB_2, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mWallIB_2, DXGI_FORMAT_R32_UINT, 0);
+
+		// draw wall
+		XMMATRIX world = XMLoadFloat4x4(&mWall_2);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world*view*proj;
+
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWallTexTransform));
+		Effects::BasicFX->SetMaterial(mWallMat);
+		Effects::BasicFX->SetDiffuseMap(mWallMapSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWallVB_3, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mWallIB_3, DXGI_FORMAT_R32_UINT, 0);
+
+		// draw wall
+		XMMATRIX world = XMLoadFloat4x4(&mWall_3);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world*view*proj;
+
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWallTexTransform));
+		Effects::BasicFX->SetMaterial(mWallMat);
+		Effects::BasicFX->SetDiffuseMap(mWallMapSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWallVB_4, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mWallIB_4, DXGI_FORMAT_R32_UINT, 0);
+
+		// draw wall
+		XMMATRIX world = XMLoadFloat4x4(&mWall_4);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world*view*proj;
+
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWallTexTransform));
+		Effects::BasicFX->SetMaterial(mWallMat);
+		Effects::BasicFX->SetDiffuseMap(mWallMapSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -351,16 +436,95 @@ void World::buildBuffers()
 	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB));
 
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 
+	//D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_2));
 
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
 
+	//std::vector<UINT> indices;
+	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
 
+	//D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_2));
 
+	/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 
+	//D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_3));
 
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
 
+	//std::vector<UINT> indices;
+	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
 
+	//D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_3));
 
+	////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	//D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_4));
+
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
+
+	//std::vector<UINT> indices;
+	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
+
+	//D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_4));
 
 
 

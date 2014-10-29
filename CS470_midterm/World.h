@@ -36,6 +36,9 @@ private:
 	ID3D11Buffer* mWallVB_3;
 	ID3D11Buffer* mWallIB_3;
 
+	ID3D11Buffer* mWallVB_4;
+	ID3D11Buffer* mWallIB_4;
+
 	ID3D11ShaderResourceView* mFloorMapSRV;
 	ID3D11ShaderResourceView* mWallMapSRV;
 
@@ -51,6 +54,7 @@ private:
 	XMFLOAT4X4 mWall;
 	XMFLOAT4X4 mWall_2;
 	XMFLOAT4X4 mWall_3;
+	XMFLOAT4X4 mWall_4;
 
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
