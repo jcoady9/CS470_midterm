@@ -9,6 +9,12 @@
 
 #include "d3dUtil.h"
 
+static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+
 namespace Vertex
 {
 	//TODO: Basic 32-byte vertex structure.
@@ -17,6 +23,12 @@ namespace Vertex
 		XMFLOAT3 Pos;
 		XMFLOAT3 Normal;
 		XMFLOAT2 Tex;
+	};
+
+	// TODO: Mesh vertex structure
+	struct MeshVertex {
+		XMFLOAT3 pos;
+		XMFLOAT4 color;
 	};
 }
 

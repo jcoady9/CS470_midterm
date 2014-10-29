@@ -5,6 +5,7 @@
 #include "LightHelper.h"
 #include "Effects.h"
 #include "Vertex.h"
+#include "M3DMesh.h"
 
 class World : public D3DApp{
 public:
@@ -23,6 +24,21 @@ public:
 private:
 
 	void buildBuffers();
+	void buildMeshFX();
+	void buildVertexMeshLayouts();
+
+	std::string mTableMeshFilename;
+
+	M3DMesh mTableMesh;
+
+
+	std::wstring mFXFileName;
+	ID3DX11Effect* mFX;
+	ID3DX11EffectTechnique* mTech;
+	ID3DX11EffectMatrixVariable* mFXMatVar;
+
+	// Vertex buffer
+	ID3D11InputLayout* mVertexLayout;
 
 	ID3D11Buffer* mFloorVB;
 	ID3D11Buffer* mFloorIB;
@@ -68,6 +84,7 @@ private:
 
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
+	XMFLOAT4X4 mWVP;
 
 	int mBoxVertexOffset;
 	UINT mBoxIndexOffset;

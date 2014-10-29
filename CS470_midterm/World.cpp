@@ -19,17 +19,17 @@
 
 #include "World.h"
 
- 
-
 World::World(HINSTANCE hInstance)
 : D3DApp(hInstance), mFloorVB(0), mFloorIB(0), mFloorMapSRV(0), mWallVB(0), mWallIB(0), mWallMapSRV(0), mWallVB_2(0), mWallIB_2(0), mWallVB_3(0), mWallIB_3(0), mWallVB_4(0), mWallIB_4(0),
 mWaterMapSRV(0), mWaterVB(0), mWaterIB(0), mWaterTexAnimate(0.0f, 0.0f),
 mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(2.5f)
 {
-	mMainWndCaption = L"Crate Demo";
+	mMainWndCaption = L"CS470 Midterm";
 	
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
+
+	mTableMeshFilename = "Meshes/table.m3d";
 
 
 	XMMATRIX I = XMMatrixIdentity();
@@ -44,6 +44,7 @@ mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper
 	XMStoreFloat4x4(&mWaterTexTransform, I);
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
+	XMStoreFloat4x4(&mWVP, I);
 
 	XMMATRIX scale, rotate, translate;
 	XMVECTOR axis;
@@ -123,6 +124,9 @@ World::~World()
 	ReleaseCOM(mFloorVB);
 	ReleaseCOM(mFloorIB);
 	ReleaseCOM(mFloorMapSRV);
+	ReleaseCOM(mFX);
+	ReleaseCOM(mVertexLayout);
+	
 
 	Effects::DestroyAll();
 	InputLayouts::DestroyAll();
@@ -132,6 +136,15 @@ bool World::Init()
 {
 	if(!D3DApp::Init())
 		return false;
+
+	XMMATRIX tableScale = XMMatrixScaling(0.0f, 0.1f, 0.0f);
+	XMStoreFloat4x4(&mTableMesh.World, tableScale);
+
+	mTableMesh.Init(md3dDevice, mTableMeshFilename);
+
+	mFXFileName = L"FX/meshfx.fx";
+	buildMeshFX();
+	buildVertexMeshLayouts();
 
 	// Must init Effects first since InputLayouts depend on shader signatures.
 	Effects::InitAll(md3dDevice);
@@ -186,7 +199,7 @@ void World::UpdateScene(float dt)
 
 void World::DrawScene()
 {
-	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	md3dImmediateContext->IASetInputLayout(InputLayouts::Basic32);
@@ -333,8 +346,58 @@ void World::DrawScene()
 		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	md3dImmediateContext->IASetInputLayout(mVertexLayout);
+
+	XMMATRIX v = XMLoadFloat4x4(&mView);
+	XMMATRIX p = XMLoadFloat4x4(&mProj);
+	XMMATRIX VP = v*p;
+
+	D3DX11_TECHNIQUE_DESC td;
+	mTech->GetDesc(&td);
+	for (UINT p = 0; p < td.Passes; p++){
+		// TODO: Render object
+		// Set modelview projection matrix for object
+		XMMATRIX w = XMLoadFloat4x4(&mTableMesh.World);
+		XMMATRIX wvp = w*VP;
+		mFXMatVar->SetMatrix(reinterpret_cast<float*>(&VP));
+		// Draw subsets
+		for (UINT subset = 0; subset < mTableMesh.SubsetCount; ++subset){
+			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+			mTableMesh.MeshData.Draw(md3dImmediateContext, subset);
+		}
+	}
 
 	HR(mSwapChain->Present(0, 0));
+}
+
+void World::buildMeshFX(){
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) | defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	//TODO: Create shader
+	// Load effects file
+	ID3D10Blob* shader = 0;
+	ID3D10Blob* compilationErrors = 0;
+	HR(D3DX11CompileFromFile(mFXFileName.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &shader, &compilationErrors, 0));
+
+	// TODO: Create effect from shader
+	HR(D3DX11CreateEffectFromMemory(shader->GetBufferPointer(), shader->GetBufferSize(), 0, md3dDevice, &mFX));
+	ReleaseCOM(shader);
+
+	// Get technique from effect
+	mTech = mFX->GetTechniqueByName("BasicTech");
+
+	// Associate modelview-projection shader variable
+	mFXMatVar = mFX->GetVariableByName("gWVP")->AsMatrix();
+}
+
+void World::buildVertexMeshLayouts(){
+	D3DX11_PASS_DESC pd;
+	mTech->GetPassByIndex(0)->GetDesc(&pd);
+	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, pd.pIAInputSignature, pd.IAInputSignatureSize, &mVertexLayout));
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y)

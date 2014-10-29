@@ -63,6 +63,12 @@
     <ClCompile Include="..\..\..\3DGameProgramming\Common\xnacollision.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="MeshGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="M3DMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">
@@ -107,6 +113,12 @@
     <ClInclude Include="..\..\..\3DGameProgramming\Common\xnacollision.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="M3DMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Meshes\chair.m3d">
@@ -121,6 +133,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="FX\LightHelper.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\meshfx.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
