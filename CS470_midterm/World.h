@@ -39,13 +39,18 @@ private:
 	ID3D11Buffer* mWallVB_4;
 	ID3D11Buffer* mWallIB_4;
 
+	ID3D11Buffer* mWaterVB;
+	ID3D11Buffer* mWaterIB;
+
 	ID3D11ShaderResourceView* mFloorMapSRV;
 	ID3D11ShaderResourceView* mWallMapSRV;
+	ID3D11ShaderResourceView* mWaterMapSRV;
 
 	DirectionalLight mDirLights[3];
 
 	Material mFloorMat;
 	Material mWallMat;
+	Material mWaterMat;
 
 	XMFLOAT4X4 mFloorTexTransform;
 	XMFLOAT4X4 mFloor;
@@ -55,6 +60,11 @@ private:
 	XMFLOAT4X4 mWall_2;
 	XMFLOAT4X4 mWall_3;
 	XMFLOAT4X4 mWall_4;
+
+	XMFLOAT4X4 mWaterTexTransform;
+	XMFLOAT4X4 mWater;
+
+	XMFLOAT2 mWaterTexAnimate;
 
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
