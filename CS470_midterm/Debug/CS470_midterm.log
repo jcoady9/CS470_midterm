@@ -1,15 +1,10 @@
-﻿Build started 10/29/2014 12:54:49 PM.
+﻿Build started 10/29/2014 7:35:22 PM.
      1>Project "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\CS470_midterm\CS470_midterm.vcxproj" on node 2 (Build target(s)).
-     1>FxCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_5_0 /Fo "C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\meshfx.cso" /Od /Zi FX\meshfx.fx 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-         
-         compilation object save succeeded; see C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\meshfx.cso
-       ClCompile:
+     1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt World.cpp
          World.cpp
-     1>c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\world.cpp(192): warning C4244: '+=' : conversion from 'double' to 'FLOAT', possible loss of data
-     1>c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\world.cpp(193): warning C4244: '+=' : conversion from 'double' to 'FLOAT', possible loss of data
+     1>c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\world.cpp(187): warning C4244: '+=' : conversion from 'double' to 'FLOAT', possible loss of data
+     1>c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\world.cpp(188): warning C4244: '+=' : conversion from 'double' to 'FLOAT', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dx11d.lib D3DCompiler.lib Effects11d.lib dxerr.lib dxgi.lib dxguid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.lib" /MACHINE:X86 Debug\Camera.obj
          Debug\d3dApp.obj
@@ -25,6 +20,7 @@
          Debug\M3DMesh.obj
          Debug\main.obj
          Debug\MeshGeometry.obj
+         Debug\RenderStates.obj
          Debug\Vertex.obj
          Debug\World.obj
          CS470_midterm.vcxproj -> C:\Users\Josh\Documents\Visual Studio 2013\Projects\CS470_midterm\Debug\CS470_midterm.exe
@@ -32,4 +28,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.31
+Time Elapsed 00:00:01.13

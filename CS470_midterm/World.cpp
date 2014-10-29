@@ -1,14 +1,3 @@
-//***************************************************************************************
-// CrateDemo.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Demonstrates texturing a floor.
-//
-// Controls:
-//		Hold the left mouse button down and move the mouse to rotate.
-//      Hold the right mouse button down to zoom in and out.
-//
-//***************************************************************************************
-
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -16,6 +5,7 @@
 #include "LightHelper.h"
 #include "Effects.h"
 #include "Vertex.h"
+#include "RenderStates.h"
 
 #include "World.h"
 
@@ -30,7 +20,6 @@ mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper
 	mLastMousePos.y = 0;
 
 	mTableMeshFilename = "Meshes/table.m3d";
-
 
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mFloor, I);
@@ -80,9 +69,9 @@ mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper
 	XMStoreFloat4x4(&mWall_4, scale * translate);
 
 	//transform water
-	translate = XMMatrixTranslation(-2.3f, 0.2f, 0.0f);
-	scale = XMMatrixScaling(2.0f, 0.1f, 7.0f);
-	XMStoreFloat4x4(&mWater, scale * translate);
+	//translate = XMMatrixTranslation(-2.3f, 0.2f, 0.0f);
+	//scale = XMMatrixScaling(2.0f, 0.001f, 7.0f);
+	//XMStoreFloat4x4(&mWater, scale * translate);
 
 	mDirLights[0].Ambient  = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	mDirLights[0].Diffuse  = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
@@ -93,6 +82,11 @@ mCameraPos(0.0f, 50.0f, 8.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper
 	mDirLights[1].Diffuse  = XMFLOAT4(1.4f, 1.4f, 1.4f, 1.0f);
 	mDirLights[1].Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 16.0f);
 	mDirLights[1].Direction = XMFLOAT3(-0.707f, 0.0f, 0.707f);
+
+	mDirLights[2].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mDirLights[2].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[2].Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mDirLights[2].Direction = XMFLOAT3(0.0f, -0.707f, -0.707f);
 
 	mFloorMat.Ambient  = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	mFloorMat.Diffuse  = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -127,9 +121,9 @@ World::~World()
 	ReleaseCOM(mFX);
 	ReleaseCOM(mVertexLayout);
 	
-
 	Effects::DestroyAll();
 	InputLayouts::DestroyAll();
+	RenderStates::DestroyAll();
 }
 
 bool World::Init()
@@ -140,15 +134,16 @@ bool World::Init()
 	XMMATRIX tableScale = XMMatrixScaling(0.0f, 0.1f, 0.0f);
 	XMStoreFloat4x4(&mTableMesh.World, tableScale);
 
-	mTableMesh.Init(md3dDevice, mTableMeshFilename);
+	//mTableMesh.Init(md3dDevice, mTableMeshFilename);
 
-	mFXFileName = L"FX/meshfx.fx";
-	buildMeshFX();
-	buildVertexMeshLayouts();
+	//mFXFileName = L"FX/meshfx.fx";
+	//buildMeshFX();
+	//buildVertexMeshLayouts();
 
 	// Must init Effects first since InputLayouts depend on shader signatures.
 	Effects::InitAll(md3dDevice);
 	InputLayouts::InitAll(md3dDevice);
+	RenderStates::InitAll(md3dDevice);
 
 	//set texture for the floor
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/dirt.png", 0, 0, &mFloorMapSRV, 0));
@@ -216,9 +211,9 @@ void World::DrawScene()
 	Effects::BasicFX->SetDirLights(mDirLights);
 	Effects::BasicFX->SetEyePosW(mCameraPos);
  
-	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light2TexTech;
-
+	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexTech;
     D3DX11_TECHNIQUE_DESC techDesc;
+
 	activeTech->GetDesc( &techDesc );
     for(UINT p = 0; p < techDesc.Passes; ++p)
     {
@@ -325,12 +320,14 @@ void World::DrawScene()
 		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////
-	for (UINT p = 0; p < techDesc.Passes; ++p)
-	{
+	//draw water
+
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	for (UINT p = 0; p < techDesc.Passes; ++p){
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWaterVB, &stride, &offset);
 		md3dImmediateContext->IASetIndexBuffer(mWaterIB, DXGI_FORMAT_R32_UINT, 0);
 
-		// draw wall
+		// Set per object constants.
 		XMMATRIX world = XMLoadFloat4x4(&mWater);
 		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
 		XMMATRIX worldViewProj = world*view*proj;
@@ -342,10 +339,21 @@ void World::DrawScene()
 		Effects::BasicFX->SetMaterial(mWaterMat);
 		Effects::BasicFX->SetDiffuseMap(mWaterMapSRV);
 
+		//md3dImmediateContext->OMSetBlendState(RenderStates::TransparentBS, blendFactor, 0xffffffff);
+		md3dImmediateContext->RSSetState(RenderStates::CCWcullMode);
 		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
+		md3dImmediateContext->RSSetState(0);
+		md3dImmediateContext->RSSetState(RenderStates::CWcullMode);
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
+		md3dImmediateContext->RSSetState(0);
+		// Restore default blend state
+		//md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
 	md3dImmediateContext->IASetInputLayout(mVertexLayout);
 
 	XMMATRIX v = XMLoadFloat4x4(&mView);
@@ -355,7 +363,6 @@ void World::DrawScene()
 	D3DX11_TECHNIQUE_DESC td;
 	mTech->GetDesc(&td);
 	for (UINT p = 0; p < td.Passes; p++){
-		// TODO: Render object
 		// Set modelview projection matrix for object
 		XMMATRIX w = XMLoadFloat4x4(&mTableMesh.World);
 		XMMATRIX wvp = w*VP;
@@ -366,7 +373,7 @@ void World::DrawScene()
 			mTableMesh.MeshData.Draw(md3dImmediateContext, subset);
 		}
 	}
-
+	*/
 	HR(mSwapChain->Present(0, 0));
 }
 
@@ -665,6 +672,8 @@ void World::buildBuffers()
 	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWaterIB));
 
+	//////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
 
 
 

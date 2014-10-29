@@ -1,10 +1,5 @@
 #include "d3dApp.h"
-#include "d3dx11Effect.h"
-#include "GeometryGenerator.h"
-#include "MathHelper.h"
-#include "LightHelper.h"
-#include "Effects.h"
-#include "Vertex.h"
+#include "Waves.h"
 #include "M3DMesh.h"
 
 class World : public D3DApp{
@@ -79,6 +74,8 @@ private:
 
 	XMFLOAT4X4 mWaterTexTransform;
 	XMFLOAT4X4 mWater;
+
+	Waves waveWater;
 
 	XMFLOAT2 mWaterTexAnimate;
 

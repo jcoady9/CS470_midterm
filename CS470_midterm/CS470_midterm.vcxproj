@@ -87,6 +87,7 @@
     <ClCompile Include="M3DMesh.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshGeometry.cpp" />
+    <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
@@ -105,6 +106,7 @@
     <ClInclude Include="Effects.h" />
     <ClInclude Include="M3DMesh.h" />
     <ClInclude Include="MeshGeometry.h" />
+    <ClInclude Include="RenderStates.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
