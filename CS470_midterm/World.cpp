@@ -1,3 +1,14 @@
+//***************************************************************************************
+// CrateDemo.cpp by Frank Luna (C) 2011 All Rights Reserved.
+//
+// Demonstrates texturing a floor.
+//
+// Controls:
+//		Hold the left mouse button down and move the mouse to rotate.
+//      Hold the right mouse button down to zoom in and out.
+//
+//***************************************************************************************
+
 #include "d3dApp.h"
 #include "d3dx11Effect.h"
 #include "GeometryGenerator.h"
@@ -5,88 +16,110 @@
 #include "LightHelper.h"
 #include "Effects.h"
 #include "Vertex.h"
-//#include "RenderStates.h"
-#include "Waves.h"
-#include "MeshGeometry.h"
 
 #include "World.h"
 
-// Class methods
-World::World(HINSTANCE hInstance) : D3DApp(hInstance), mFX(0), mTech(0), mVertexLayout(0), mFXMatVar(0), mTableMapSRV(0),
-mCameraPos(0.0f, 0.0f, 0.0f), mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(80.0f)
+ 
+
+World::World(HINSTANCE hInstance)
+: D3DApp(hInstance), mFloorVB(0), mFloorIB(0), mFloorMapSRV(0), mWallVB(0), mWallIB(0), mWallMapSRV(0), mWallVB_2(0), mWallIB_2(0), mWallVB_3(0), mWallIB_3(0), mCameraPos(0.0f, 50.0f, 8.0f),
+  mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(2.5f)
 {
-	// Change the window caption
-	mMainWndCaption = L"Midterm Project";
+	mMainWndCaption = L"Crate Demo";
+	
+	mLastMousePos.x = 0;
+	mLastMousePos.y = 0;
 
-	// Initialize matricies to identirty matrix
-	XMMATRIX iMatrix = XMMatrixIdentity();
+	XMMATRIX I = XMMatrixIdentity();
+	XMStoreFloat4x4(&mFloor, I);
+	XMStoreFloat4x4(&mWall, I);
+	XMStoreFloat4x4(&mFloorTexTransform, I);
+	XMStoreFloat4x4(&mWallTexTransform, I);
 
-	XMStoreFloat4x4(&mView, iMatrix);
-	XMStoreFloat4x4(&mProj, iMatrix);
-	XMStoreFloat4x4(&mWVP, iMatrix);
 
-	//scale textures
+	XMStoreFloat4x4(&mView, I);
+	XMStoreFloat4x4(&mProj, I);
 
-	// Initialize camera orientation
-	mEye = { 0.0f, 0.0f, 1.0f };
-	mAt = { 0.0f, 0.0f, 0.0f };
-	mUp = { 0.0f, 1.0f, 0.0f };
+	XMMATRIX scale, rotate, translate;
+	XMVECTOR axis;
 
-	//set mesh filenames
-	mTableMeshFilename = "Meshes/table.m3d";
-	mChairMeshFilename = "Meshes/chair.m3d";
+	//scale floor
+	scale = XMMatrixScaling(7.0f, 0.2f, 7.0f);
+	XMStoreFloat4x4(&mFloor, scale);
 
-};
+	//scale back-wall
+	axis = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	rotate = XMMatrixRotationAxis(axis, 80.0f);
+	translate = XMMatrixTranslation(3.0f, 1.0f, 0.0f);
+	scale = XMMatrixScaling(2.0f, 0.1f, 3.0f);
+	XMStoreFloat4x4(&mWall, scale * rotate * translate);
+
+	mDirLights[0].Ambient  = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	mDirLights[0].Diffuse  = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	mDirLights[0].Specular = XMFLOAT4(0.6f, 0.6f, 0.6f, 16.0f);
+	mDirLights[0].Direction = XMFLOAT3(0.707f, -0.707f, 0.0f);
+ 
+	mDirLights[1].Ambient  = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[1].Diffuse  = XMFLOAT4(1.4f, 1.4f, 1.4f, 1.0f);
+	mDirLights[1].Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 16.0f);
+	mDirLights[1].Direction = XMFLOAT3(-0.707f, 0.0f, 0.707f);
+
+	mFloorMat.Ambient  = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mFloorMat.Diffuse  = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mFloorMat.Specular = XMFLOAT4(0.6f, 0.6f, 0.6f, 16.0f);
+
+	mWallMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mWallMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mWallMat.Specular = XMFLOAT4(0.6f, 0.6f, 0.6f, 16.0f);
+
+}
 
 World::~World()
 {
-	ReleaseCOM(mTableMapSRV);
-	ReleaseCOM(mFX);
-	ReleaseCOM(mVertexLayout);
-};
+	ReleaseCOM(mWallVB);
+	ReleaseCOM(mWallIB);
+	ReleaseCOM(mWallVB_2);
+	ReleaseCOM(mWallIB_2);
+	ReleaseCOM(mWallVB_3);
+	ReleaseCOM(mWallIB_3);
+	ReleaseCOM(mWallMapSRV);
+	ReleaseCOM(mFloorVB);
+	ReleaseCOM(mFloorIB);
+	ReleaseCOM(mFloorMapSRV);
+
+	Effects::DestroyAll();
+	InputLayouts::DestroyAll();
+}
 
 bool World::Init()
 {
-	// Simply use base class initializer
-	if (!D3DApp::Init())
+	if(!D3DApp::Init())
 		return false;
 
-	// initialize mesh objects
-	mTableMesh.Init(md3dDevice, mTableMeshFilename);
+	// Must init Effects first since InputLayouts depend on shader signatures.
+	Effects::InitAll(md3dDevice);
+	InputLayouts::InitAll(md3dDevice);
 
-
-	// Create effect and vertex layout
-	mShaderFilename = L"basicfx.fx";
-	buildFX();
-	buildVertexLayouts();
-
-	// Initialize view matrix from camera
-	mEye = { 5.0f, 5.0f, 5.0f };
-	mAt = { 0.0f, 0.0f, 0.0f };
-	mUp = { 0.0f, 1.0f, 0.0f };
-
-	XMVECTOR e = XMLoadFloat3(&mEye);
-	XMVECTOR a = XMLoadFloat3(&mAt);
-	XMVECTOR u = XMLoadFloat3(&mUp);
-
-	XMMATRIX camera = XMMatrixLookAtLH(e, a, u);
-	XMStoreFloat4x4(&mView, camera);
+	//set texture for the floor
+	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/dirt.png", 0, 0, &mFloorMapSRV, 0));
+	//set texture for the walls
+	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/darkbrick.bmp", 0, 0, &mWallMapSRV, 0));
+ 
+	buildBuffers();
 
 	return true;
 }
 
 void World::OnResize()
 {
-	// Simply use base class resize
 	D3DApp::OnResize();
 
-	// Reset (90 degree fov) projection frustum
-	XMMATRIX proj = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-	XMStoreFloat4x4(&mProj, proj);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
+	XMStoreFloat4x4(&mProj, P);
 }
 
-void World::UpdateScene(float dt){
-
+void World::UpdateScene(float dt)
+{
 	// Convert Spherical to Cartesian coordinates.
 	float x = mRadius*sinf(mPhi)*cosf(mTheta);
 	float z = mRadius*sinf(mPhi)*sinf(mTheta);
@@ -95,109 +128,82 @@ void World::UpdateScene(float dt){
 	mCameraPos = XMFLOAT3(x, y, z);
 
 	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+	XMVECTOR pos    = XMVectorSet(x, y, z, 1.0f);
 	XMVECTOR target = XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR up     = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, V);
 
 
-	XMMATRIX tableScale = XMMatrixScaling(100.0f, 100.0f, 100.0f);
-	XMStoreFloat4x4(&mTableMesh.World, tableScale);
-
 }
 
-void World::DrawScene(){
-	// Check for valid rendering context and swap chain
-	assert(md3dImmediateContext);
-	assert(mSwapChain);
+void World::DrawScene()
+{
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
+	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	md3dImmediateContext->IASetInputLayout(InputLayouts::Basic32);
+    md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+ 
 	UINT stride = sizeof(Vertex::Basic32);
-	UINT offset = 0;
+    UINT offset = 0;
+ 
+	XMMATRIX view  = XMLoadFloat4x4(&mView);
+	XMMATRIX proj  = XMLoadFloat4x4(&mProj);
+	XMMATRIX viewProj = view*proj;
 
-	// Simply clear render view to blue
-	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
+	// Set per frame constants.
+	Effects::BasicFX->SetDirLights(mDirLights);
+	Effects::BasicFX->SetEyePosW(mCameraPos);
+ 
+	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light2TexTech;
 
-	// Clear depth buffer to 1.0 and stenci buffer to 0
-	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    D3DX11_TECHNIQUE_DESC techDesc;
+	activeTech->GetDesc( &techDesc );
+    for(UINT p = 0; p < techDesc.Passes; ++p)
+    {
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mFloorIB, DXGI_FORMAT_R32_UINT, 0);
 
-	// TODO: Set input layout to object vertices
-	md3dImmediateContext->IASetInputLayout(mVertexLayout);
+		// Draw the floor.
+		XMMATRIX world = XMLoadFloat4x4(&mFloor);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world*view*proj;
 
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mFloorTexTransform));
+		Effects::BasicFX->SetMaterial(mFloorMat);
+		Effects::BasicFX->SetDiffuseMap(mFloorMapSRV);
 
-	// TODO: Compute total modelview-projection matrix
-	XMMATRIX v = XMLoadFloat4x4(&mView);
-	XMMATRIX p = XMLoadFloat4x4(&mProj);
-	XMMATRIX VP = v*p;
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
+    }
 
+	for (UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		md3dImmediateContext->IASetVertexBuffers(0, 1, &mWallVB, &stride, &offset);
+		md3dImmediateContext->IASetIndexBuffer(mWallIB, DXGI_FORMAT_R32_UINT, 0);
 
-	//Get technique and loop over passes
-	D3DX11_TECHNIQUE_DESC td;
-	mTech->GetDesc(&td);
-	for (UINT p = 0; p < td.Passes; p++){
-		// Set modelview projection matrix for object
-		XMMATRIX table = XMLoadFloat4x4(&mTableMesh.World);
-		XMMATRIX wvp = table*VP;
-		mFXMatVar->SetMatrix(reinterpret_cast<float*>(&VP));
-		// Draw subsets
-		for (UINT subset = 0; subset < mTableMesh.SubsetCount; ++subset){
-			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		// draw wall
+		XMMATRIX world = XMLoadFloat4x4(&mWall);
+		XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
+		XMMATRIX worldViewProj = world*view*proj;
 
-			mTableMesh.MeshData.Draw(md3dImmediateContext, subset);
-		}
+		Effects::BasicFX->SetWorld(world);
+		Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
+		Effects::BasicFX->SetWorldViewProj(worldViewProj);
+		Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&mWallTexTransform));
+		Effects::BasicFX->SetMaterial(mWallMat);
+		Effects::BasicFX->SetDiffuseMap(mWallMapSRV);
+
+		activeTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
+		md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
 	}
 
-	// Swap back buffer
 	HR(mSwapChain->Present(0, 0));
-};
-
-// Build effect
-void World::buildFX()
-{
-	// Set shader flags
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) | defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	//TODO: Create shader
-	// Load effects file
-	ID3D10Blob* shader = 0;
-	ID3D10Blob* compilationErrors = 0;
-	HRESULT hr = D3DX11CompileFromFile(mShaderFilename.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &shader, &compilationErrors, 0);
-
-
-	// Output debug info if compilation failed
-	if (FAILED(hr)){
-		// Check for compilation errors or warnings
-		if (compilationErrors != 0){
-			MessageBoxA(0, (char*)compilationErrors->GetBufferPointer(), 0, 0);
-			ReleaseCOM(compilationErrors);
-		}
-		DXTrace(__FILE__, (DWORD)__LINE__, hr, L"D3DX11CompileFromFile", true);
-	}
-
-	// TODO: Create effect from shader
-	HR(D3DX11CreateEffectFromMemory(shader->GetBufferPointer(), shader->GetBufferSize(), 0, md3dDevice, &mFX));
-	ReleaseCOM(shader);
-
-	// TODO: Set technique and associate variables
-	// Get technique from effect
-	mTech = mFX->GetTechniqueByName("BasicTech");
-
-	// Associate modelview-projection shader variable
-	mFXMatVar = mFX->GetVariableByName("gWVP")->AsMatrix();
-}
-
-// Build vertex layout
-void World::buildVertexLayouts()
-{
-	// Create vertex layout for pass 0
-	D3DX11_PASS_DESC pd;
-	mTech->GetPassByIndex(0)->GetDesc(&pd);
-	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, pd.pIAInputSignature, pd.IAInputSignatureSize, &mVertexLayout));
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y)
@@ -215,32 +221,154 @@ void World::OnMouseUp(WPARAM btnState, int x, int y)
 
 void World::OnMouseMove(WPARAM btnState, int x, int y)
 {
-	if ((btnState & MK_LBUTTON) != 0)
+	if( (btnState & MK_LBUTTON) != 0 )
 	{
 		// Make each pixel correspond to a quarter of a degree.
 		float dx = XMConvertToRadians(0.25f*static_cast<float>(x - mLastMousePos.x));
 		float dy = XMConvertToRadians(0.25f*static_cast<float>(y - mLastMousePos.y));
 
-		// Update angles based on input to orbit camera around box.
+		// Update angles based on input to orbit camera around floor.
 		mTheta += dx;
-		mPhi += dy;
+		mPhi   += dy;
 
 		// Restrict the angle mPhi.
-		mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
+		mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi-0.1f);
 	}
-	else if ((btnState & MK_RBUTTON) != 0)
+	else if( (btnState & MK_RBUTTON) != 0 )
 	{
 		// Make each pixel correspond to 0.01 unit in the scene.
-		float dx = 0.1f*static_cast<float>(x - mLastMousePos.x);
-		float dy = 0.1f*static_cast<float>(y - mLastMousePos.y);
+		float dx = 0.01f*static_cast<float>(x - mLastMousePos.x);
+		float dy = 0.01f*static_cast<float>(y - mLastMousePos.y);
 
 		// Update the camera radius based on input.
 		mRadius += dx - dy;
 
 		// Restrict the radius.
-		mRadius = MathHelper::Clamp(mRadius, 20.0f, 500.0f);
+		mRadius = MathHelper::Clamp(mRadius, 1.0f, 15.0f);
 	}
 
 	mLastMousePos.x = x;
 	mLastMousePos.y = y;
 }
+
+void World::buildBuffers()
+{
+	
+	GeometryGenerator::MeshData floor;
+
+	GeometryGenerator geoGen;
+	geoGen.CreateBox(1.0f, 1.0f, 1.0f, floor);
+
+	// Cache the vertex offsets to each object in the concatenated vertex buffer.
+	mBoxVertexOffset = 0;
+
+	// Cache the index count of each object.
+	mBoxIndexCount = floor.Indices.size();
+
+	// Cache the starting index for each object in the concatenated index buffer.
+	mBoxIndexOffset      = 0;
+	
+	UINT totalVertexCount = floor.Vertices.size();
+
+	UINT totalIndexCount = mBoxIndexCount;
+
+	D3D11_BUFFER_DESC vbd;
+	D3D11_BUFFER_DESC ibd;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	D3D11_SUBRESOURCE_DATA iinitData;
+
+	//
+	// Extract the vertex elements we are interested in and pack the
+	// vertices of all the meshes into one vertex buffer.
+	//
+
+	std::vector<Vertex::Basic32> vertices(totalVertexCount);
+
+	UINT k = 0;
+	for(size_t i = 0; i < floor.Vertices.size(); ++i, ++k)
+	{
+		vertices[k].Pos    = floor.Vertices[i].Position;
+		vertices[k].Normal = floor.Vertices[i].Normal;
+		vertices[k].Tex    = floor.Vertices[i].TexC;
+	}
+
+    //D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+
+    vinitData.pSysMem = &vertices[0];
+    HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mFloorVB));
+
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
+
+	std::vector<UINT> indices;
+	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
+
+	//D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(UINT) * totalIndexCount;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+//    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = &indices[0];
+    HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mFloorIB));
+
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	//D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB));
+
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
+
+	//std::vector<UINT> indices;
+	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
+
+	//D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	//D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+ 

@@ -1,16 +1,16 @@
 #include "d3dApp.h"
-#include "M3DMesh.h"
-#include "MeshGeometry.h"
-#include <string>
+#include "d3dx11Effect.h"
+#include "GeometryGenerator.h"
+#include "MathHelper.h"
+#include "LightHelper.h"
+#include "Effects.h"
+#include "Vertex.h"
 
-// Subclass declaration
-class World : public D3DApp {
-
+class World : public D3DApp{
 public:
-	World(HINSTANCE);
+	World(HINSTANCE hInstance);
 	~World();
 
-	// Overriden methods
 	bool Init();
 	void OnResize();
 	void UpdateScene(float dt);
@@ -22,44 +22,42 @@ public:
 
 private:
 
-	//Shader methods
-	void buildFX();
-	void buildVertexLayouts();
+	void buildBuffers();
 
-	// Cube mesh object
-	M3DMesh mTableMesh;
-	M3DMesh mChairMesh;
+	ID3D11Buffer* mFloorVB;
+	ID3D11Buffer* mFloorIB;
 
+	ID3D11Buffer* mWallVB;
+	ID3D11Buffer* mWallIB;
 
-	XMFLOAT4X4 mTable;
-	//XMFLOAT4X4 mTableTransform;
+	ID3D11Buffer* mWallVB_2;
+	ID3D11Buffer* mWallIB_2;
 
-	ID3D11Buffer* mTableVB;
-	ID3D11Buffer* mTableIB;
+	ID3D11Buffer* mWallVB_3;
+	ID3D11Buffer* mWallIB_3;
 
-	std::string mTableMeshFilename;
-	std::string mChairMeshFilename;
+	ID3D11ShaderResourceView* mFloorMapSRV;
+	ID3D11ShaderResourceView* mWallMapSRV;
 
-	ID3D11ShaderResourceView* mTableMapSRV;
+	DirectionalLight mDirLights[3];
 
-	// Shader variables
-	std::wstring mShaderFilename;
-	ID3DX11Effect* mFX;
-	ID3DX11EffectTechnique* mTech;
-	ID3DX11EffectMatrixVariable* mFXMatVar;
+	Material mFloorMat;
+	Material mWallMat;
 
-	// Vertex buffer
-	ID3D11InputLayout* mVertexLayout;
+	XMFLOAT4X4 mFloorTexTransform;
+	XMFLOAT4X4 mFloor;
 
-	// Global transformations
+	XMFLOAT4X4 mWallTexTransform;
+	XMFLOAT4X4 mWall;
+	XMFLOAT4X4 mWall_2;
+	XMFLOAT4X4 mWall_3;
+
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
-	XMFLOAT4X4 mWVP;
 
-	// Camera vectors
-	XMFLOAT3 mEye;
-	XMFLOAT3 mAt;
-	XMFLOAT3 mUp;
+	int mBoxVertexOffset;
+	UINT mBoxIndexOffset;
+	UINT mBoxIndexCount;
 
 	XMFLOAT3 mCameraPos;
 
@@ -68,5 +66,4 @@ private:
 	float mRadius;
 
 	POINT mLastMousePos;
-
 };
