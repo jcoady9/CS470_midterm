@@ -473,12 +473,6 @@ void World::buildBuffers()
 
 	UINT totalIndexCount = mBoxIndexCount;
 
-	D3D11_BUFFER_DESC vbd;
-	D3D11_BUFFER_DESC ibd;
-
-	D3D11_SUBRESOURCE_DATA vinitData;
-	D3D11_SUBRESOURCE_DATA iinitData;
-
 	//
 	// Extract the vertex elements we are interested in and pack the
 	// vertices of all the meshes into one vertex buffer.
@@ -494,16 +488,21 @@ void World::buildBuffers()
 		vertices[k].Tex    = floor.Vertices[i].TexC;
 	}
 
-    //D3D11_BUFFER_DESC vbd;
+    D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
     vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
 
+	D3D11_SUBRESOURCE_DATA vinitData;
     vinitData.pSysMem = &vertices[0];
     HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mFloorVB));
-
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB));
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_2));
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_3));
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_4));
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWaterVB));
 	//
 	// Pack the indices of all the meshes into one index buffer.
 	//
@@ -511,174 +510,20 @@ void World::buildBuffers()
 	std::vector<UINT> indices;
 	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
 
-	//D3D11_BUFFER_DESC ibd;
+	D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;
     ibd.ByteWidth = sizeof(UINT) * totalIndexCount;
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.CPUAccessFlags = 0;
     ibd.MiscFlags = 0;
-//    D3D11_SUBRESOURCE_DATA iinitData;
+    D3D11_SUBRESOURCE_DATA iinitData;
     iinitData.pSysMem = &indices[0];
     HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mFloorIB));
-
-	////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	//D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-
-	//std::vector<UINT> indices;
-	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
-
-	//D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB));
-
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-
-	//D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_2));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-
-	//std::vector<UINT> indices;
-	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
-
-	//D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_2));
-
-	/////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////
-
-	//D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_3));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-
-	//std::vector<UINT> indices;
-	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
-
-	//D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_3));
-
-	////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////
-
-	//D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWallVB_4));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-
-	//std::vector<UINT> indices;
-	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
-
-	//D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWallIB_4));
-
-	/////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////
-
-	//D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mWaterVB));
-
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
-
-	//std::vector<UINT> indices;
-	indices.insert(indices.end(), floor.Indices.begin(), floor.Indices.end());
-
-	//D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT)* totalIndexCount;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	//D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &iinitData, &mWaterIB));
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
 }
  
