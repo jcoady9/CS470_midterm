@@ -128,36 +128,27 @@ void World::UpdateScene(float dt){
 	// Control the camera.
 	if (GetAsyncKeyState('W') & 0x8000)
 		mCam.Walk(10.0f*dt);
-
 	if (GetAsyncKeyState('S') & 0x8000)
 		mCam.Walk(-10.0f*dt);
-
 	if (GetAsyncKeyState('A') & 0x8000)
 		mCam.Strafe(-10.0f*dt);
-
 	if (GetAsyncKeyState('D') & 0x8000)
 		mCam.Strafe(10.0f*dt);
 
-	//
 	// Walk/fly mode
-	//
 	if (GetAsyncKeyState('2') & 0x8000)
 		mWalkCamMode = true;
 	if (GetAsyncKeyState('3') & 0x8000)
 		mWalkCamMode = false;
 
-	// 
 	// Clamp camera to terrain surface in walk mode.
-	//
 	if (mWalkCamMode){
 		XMFLOAT3 camPos = mCam.GetPosition();
 		float y = mTerrain.GetHeight(camPos.x, camPos.z);
 		mCam.SetPosition(camPos.x, y + 2.0f, camPos.z);
 	}
 
-	//
 	// Reset particle systems.
-	//
 	if (GetAsyncKeyState('R') & 0x8000){
 		mFire.Reset();
 		mRain.Reset();
@@ -202,8 +193,6 @@ void World::DrawScene(){
 	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat);
 	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat);
 
-
-	//}
 	/*
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -236,7 +225,7 @@ void World::DrawScene(){
 }
 
 void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat){
-	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexTech;
+	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexFogTech;
 	D3DX11_TECHNIQUE_DESC techDesc;
 	
 	// Set per object constants.
