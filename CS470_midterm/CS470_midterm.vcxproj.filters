@@ -21,108 +21,120 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Effects.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\Camera.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\d3dApp.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\d3dUtil.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\GameTimer.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\GeometryGenerator.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\LightHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\MathHelper.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\TextureMgr.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\Waves.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\3DGameProgramming\Common\xnacollision.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="MeshGeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="M3DMesh.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\Camera.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\d3dApp.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\d3dUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\GameTimer.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\GeometryGenerator.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\LightHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\MathHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\TextureMgr.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\Waves.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\xnacollision.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="RenderStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sky.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Effects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Effects.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="World.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\Camera.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\d3dApp.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\d3dUtil.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\d3dx11effect.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\GameTimer.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\GeometryGenerator.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\LightHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\MathHelper.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\TextureMgr.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\Waves.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\3DGameProgramming\Common\xnacollision.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="M3DMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeshGeometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\Camera.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\d3dApp.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\d3dUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\d3dx11effect.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\GameTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\GeometryGenerator.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\LightHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\MathHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\TextureMgr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\Waves.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\xnacollision.h">
+      <Filter>Common</Filter>
+    </ClInclude>
     <ClInclude Include="RenderStates.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sky.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Effects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -133,15 +145,42 @@
     <None Include="Meshes\table.m3d">
       <Filter>M3D Files</Filter>
     </None>
+    <None Include="FX\Basic.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="FX\Fire.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="FX\Rain.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="FX\Sky.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="FX\Terrain.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="FX\meshfx.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
     <FxCompile Include="FX\Basic.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\Fire.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="FX\LightHelper.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="FX\meshfx.fx">
+    <FxCompile Include="FX\Rain.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\Sky.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\Terrain.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
