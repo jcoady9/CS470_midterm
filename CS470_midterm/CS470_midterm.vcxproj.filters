@@ -119,9 +119,6 @@
     <ClInclude Include="..\..\..\Visual Studio 2013\3DGameProgramming\Common\xnacollision.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="RenderStates.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sky.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,6 +132,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Effects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
