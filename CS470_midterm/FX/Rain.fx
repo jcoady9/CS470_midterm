@@ -126,7 +126,7 @@ void StreamOutGS(point Particle gin[1],
 				Particle p;
 				p.InitialPosW = gEmitPosW.xyz + vRandom;
 				p.InitialVelW = float3(0.0f, 0.0f, 0.0f);
-				p.SizeW       = float2(1.0f, 1.0f);
+				p.SizeW       = float2(0.0f, 1.0f);
 				p.Age         = 0.0f;
 				p.Type        = PT_FLARE;
 			

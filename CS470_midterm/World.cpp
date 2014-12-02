@@ -9,7 +9,9 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
 
-	mCam.SetPosition(0.0f, 2.0f, 100.0f);
+	mCam.SetPosition(-7.0f, 2.0f, 15.0f);
+	XMFLOAT3 target = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	mCam.LookAt(mCam.GetPosition(), target, mCam.GetUp());
 
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mFloor, I);
@@ -82,7 +84,8 @@ bool World::Init(){
 	//set texture for water
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/water2.dds", 0, 0, &mWaterTex, 0));
 
-	mSky = new Sky(md3dDevice, L"Textures/grasscube1024.dds", 10.0f);
+	mSky = new Sky(md3dDevice, L"Textures/grasscube1024.dds", 100.0f);
+
 	/*
 	Terrain::InitInfo tii;
 	tii.HeightMapFilename = L"Textures/terrain.raw";
@@ -98,20 +101,23 @@ bool World::Init(){
 	tii.CellSpacing = 0.5f;
 
 	mTerrain.Init(md3dDevice, md3dImmediateContext, tii);
-
-	mRandomTexSRV = d3dHelper::CreateRandomTexture1DSRV(md3dDevice);
 	*/
+	mRandomTexSRV = d3dHelper::CreateRandomTexture1DSRV(md3dDevice);
+	
+	std::vector<std::wstring> raindrops;
+	raindrops.push_back(L"Textures/raindrop.dds");
+
 	std::vector<std::wstring> flares;
-	flares.push_back(L"Textures\\flare0.dds");
+	flares.push_back(L"Textures/flare0.dds");
+
+	mRainTexSRV = d3dHelper::CreateTexture2DArraySRV(md3dDevice, md3dImmediateContext, flares);
 	mFlareTexSRV = d3dHelper::CreateTexture2DArraySRV(md3dDevice, md3dImmediateContext, flares);
 
+	//initialize fire
 	mFire.Init(md3dDevice, Effects::FireFX, mFlareTexSRV, mRandomTexSRV, 500);
-	mFire.SetEmitPos(XMFLOAT3(0.0f, 1.0f, 120.0f));
+	mFire.SetEmitPos(XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	std::vector<std::wstring> raindrops;
-	raindrops.push_back(L"Textures\\raindrop.dds");
-	mRainTexSRV = d3dHelper::CreateTexture2DArraySRV(md3dDevice, md3dImmediateContext, raindrops);
-
+	//initialize rain
 	mRain.Init(md3dDevice, Effects::RainFX, mRainTexSRV, mRandomTexSRV, 10000);
 
 	buildVertexAndIndexBuffers();
@@ -182,8 +188,8 @@ void World::DrawScene(){
 	Effects::BasicFX->SetDirLights(mDirLights);
 	Effects::BasicFX->SetEyePosW(mCam.GetPosition());
 	Effects::BasicFX->SetFogColor(Colors::Silver);
-	Effects::BasicFX->SetFogStart(15.0f);
-	Effects::BasicFX->SetFogRange(175.0f);
+	Effects::BasicFX->SetFogStart(3.0f);
+	Effects::BasicFX->SetFogRange(50.0f);
 
 	//draw each object
 	drawObject(mFloor, mDirtTex, mFloorTexTransform, mDirtMat);
@@ -193,34 +199,27 @@ void World::DrawScene(){
 	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat);
 	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat);
 
-	/*
+	
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-	if (GetAsyncKeyState('1') & 0x8000)
-		md3dImmediateContext->RSSetState(RenderStates::WireframeRS);
-
-	mTerrain.Draw(md3dImmediateContext, mCam, mDirLights);
-
-	md3dImmediateContext->RSSetState(0);
-	*/
+	//mTerrain.Draw(md3dImmediateContext, mCam, mDirLights);
+	
 	mSky->Draw(md3dImmediateContext, mCam);
 
-	/*
 	//draw fire particle system
 	mFire.SetEyePos(mCam.GetPosition());
 	mFire.Draw(md3dImmediateContext, mCam);
 	md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff); // restore default
-
+	
 	//draw rain particle system
 	mRain.SetEyePos(mCam.GetPosition());
 	mRain.SetEmitPos(mCam.GetPosition());
 	mRain.Draw(md3dImmediateContext, mCam);
-
+	
 	// restore default states.
-	md3dImmediateContext->RSSetState(0);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
-	*/
+	
 	HR(mSwapChain->Present(0, 0));
 }
 
