@@ -31,7 +31,7 @@ public:
 
 private:
 	Sky* mSky;
-	Terrain mTerrain;
+	Terrain volcanoTerrain;
 
 	//matrices to store object worlds
 	XMFLOAT4X4 mFloor;

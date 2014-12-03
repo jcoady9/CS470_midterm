@@ -1,5 +1,7 @@
 #include "World.h"
 
+static float moveUp[3] = {0.0f, 20.0f, 00.f};
+
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
 mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 {
@@ -86,24 +88,25 @@ bool World::Init(){
 
 	mSky = new Sky(md3dDevice, L"Textures/grasscube1024.dds", 100.0f);
 
-	/*
-	Terrain::InitInfo tii;
-	tii.HeightMapFilename = L"Textures/terrain.raw";
-	tii.LayerMapFilename0 = L"Textures/grass.dds";
-	tii.LayerMapFilename1 = L"Textures/darkdirt.dds";
-	tii.LayerMapFilename2 = L"Textures/stone.dds";
-	tii.LayerMapFilename3 = L"Textures/lightdirt.dds";
-	tii.LayerMapFilename4 = L"Textures/snow.dds";
-	tii.BlendMapFilename = L"Textures/blend.dds";
-	tii.HeightScale = 50.0f;
-	tii.HeightmapWidth = 2049;
-	tii.HeightmapHeight = 2049;
-	tii.CellSpacing = 0.5f;
+	Terrain::InitInfo volcanoInitInfo;
+	volcanoInitInfo.HeightMapFilename = L"Textures/volcano_terrain_mask.dds";
+	volcanoInitInfo.LayerMapFilename0 = L"Textures/grass.dds";
+	volcanoInitInfo.LayerMapFilename1 = L"Textures/darkdirt.dds";
+	volcanoInitInfo.LayerMapFilename2 = L"Textures/stone.dds";
+	volcanoInitInfo.LayerMapFilename3 = L"Textures/darkdirt.dds";
+	volcanoInitInfo.LayerMapFilename4 = L"Textures/darkdirt.dds";
+	volcanoInitInfo.BlendMapFilename = L"Textures/blend.dds";
+	volcanoInitInfo.HeightScale = 50.0f;
+	volcanoInitInfo.HeightmapWidth = 513;
+	volcanoInitInfo.HeightmapHeight = 513;
+	volcanoInitInfo.CellSpacing = 0.5f;
 
-	mTerrain.Init(md3dDevice, md3dImmediateContext, tii);
-	*/
+	//initialize terrain
+	volcanoTerrain.Init(md3dDevice, md3dImmediateContext, volcanoInitInfo);
+	
 	mRandomTexSRV = d3dHelper::CreateRandomTexture1DSRV(md3dDevice);
 	
+	//set textures for particles
 	std::vector<std::wstring> raindrops;
 	raindrops.push_back(L"Textures/raindrop.dds");
 
@@ -115,7 +118,7 @@ bool World::Init(){
 
 	//initialize fire
 	mFire.Init(md3dDevice, Effects::FireFX, mFlareTexSRV, mRandomTexSRV, 500);
-	mFire.SetEmitPos(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	mFire.SetEmitPos(XMFLOAT3(0.0f, 1.0f + moveUp[1], 0.0f));
 
 	//initialize rain
 	mRain.Init(md3dDevice, Effects::RainFX, mRainTexSRV, mRandomTexSRV, 10000);
@@ -150,7 +153,7 @@ void World::UpdateScene(float dt){
 	// Clamp camera to terrain surface in walk mode.
 	if (mWalkCamMode){
 		XMFLOAT3 camPos = mCam.GetPosition();
-		float y = mTerrain.GetHeight(camPos.x, camPos.z);
+		float y = volcanoTerrain.GetHeight(camPos.x, camPos.z);
 		mCam.SetPosition(camPos.x, y + 2.0f, camPos.z);
 	}
 
@@ -199,10 +202,9 @@ void World::DrawScene(){
 	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat);
 	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat);
 
-	
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-	//mTerrain.Draw(md3dImmediateContext, mCam, mDirLights);
+	volcanoTerrain.Draw(md3dImmediateContext, mCam, mDirLights);
 	
 	mSky->Draw(md3dImmediateContext, mCam);
 
@@ -302,38 +304,44 @@ void World::initialTransformations(){
 
 	//scale floor
 	scale = XMMatrixScaling(7.0f, 0.2f, 7.0f);
-	XMStoreFloat4x4(&mFloor, scale);
+	translate = XMMatrixTranslation(moveUp[0], moveUp[1], moveUp[2]);
+	XMStoreFloat4x4(&mFloor, scale * translate);
 
 	//transform back-wall
 	axis = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	rotate = XMMatrixRotationAxis(axis, 80.0f);
-	translate = XMMatrixTranslation(3.0f, 1.0f, 0.0f);
+	translate = XMMatrixTranslation(3.0f, 1.0f + moveUp[1], 0.0f);
 	scale = XMMatrixScaling(2.0f, 0.1f, 3.0f);
 	XMStoreFloat4x4(&mWall, scale * rotate * translate);
 
 	//transform wall2
 	axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 	rotate = XMMatrixRotationAxis(axis, 80.0f);
-	translate = XMMatrixTranslation(2.0f, 1.0f, 1.5f);
+	translate = XMMatrixTranslation(2.0f, 1.0f + moveUp[1], 1.5f);
 	scale = XMMatrixScaling(2.0f, 0.1f, 2.0f);
 	XMStoreFloat4x4(&mWall_2, scale * rotate * translate);
 
 	//transform wall3
 	axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 	rotate = XMMatrixRotationAxis(axis, 1.57f);
-	translate = XMMatrixTranslation(2.0f, 1.0f, -1.5f);
+	translate = XMMatrixTranslation(2.0f, 1.0f + moveUp[1], -1.5f);
 	scale = XMMatrixScaling(2.0f, 0.1f, 2.0f);
 	XMStoreFloat4x4(&mWall_3, scale * rotate * translate);
 
 	//transform roof
-	translate = XMMatrixTranslation(2.0f, 2.0f, 0.0f);
+	translate = XMMatrixTranslation(2.0f, 2.0f + moveUp[1], 0.0f);
 	scale = XMMatrixScaling(2.0f, 0.1f, 3.0f);
 	XMStoreFloat4x4(&mWall_4, scale * translate);
 
 	//transform water
-	translate = XMMatrixTranslation(-2.3f, 0.2f, 0.0f);
+	translate = XMMatrixTranslation(-2.3f, 0.2f + moveUp[1], 0.0f);
 	scale = XMMatrixScaling(2.0f, 0.001f, 7.0f);
 	XMStoreFloat4x4(&mWater, scale * translate);
+
+	//transform volcano terrain
+	translate = XMMatrixTranslation(0.0f, -20.0f, 0.0f);
+	volcanoTerrain.SetWorld(translate);
+
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y){
