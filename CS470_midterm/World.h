@@ -11,6 +11,8 @@
 #include "Terrain.h"
 #include "ParticleSystem.h"
 
+#define NUMFIRES 3
+
 class World : public D3DApp{
 public:
 	World(HINSTANCE hInstance);
@@ -66,7 +68,9 @@ private:
 	Material mBrickMat;
 	Material mWaterMat;
 
-	ParticleSystem mFire;
+	int numFires = NUMFIRES;
+
+	ParticleSystem volcanoFire[NUMFIRES];
 	ParticleSystem mRain;
 
 	DirectionalLight mDirLights[3];

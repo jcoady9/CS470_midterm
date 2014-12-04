@@ -11,8 +11,8 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
 
-	mCam.SetPosition(-7.0f, 2.0f, 15.0f);
-	XMFLOAT3 target = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	mCam.SetPosition(-7.0f, 2.0f + moveUp[1], 15.0f);
+	XMFLOAT3 target = XMFLOAT3(0.0f, moveUp[1], 0.0f);
 	mCam.LookAt(mCam.GetPosition(), target, mCam.GetUp());
 
 	XMMATRIX I = XMMatrixIdentity();
@@ -32,6 +32,8 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 	mDirLights[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mDirLights[0].Specular = XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f);
 	mDirLights[0].Direction = XMFLOAT3(0.707f, -0.707f, 0.0f);
+
+	
 
 	mDirLights[1].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	mDirLights[1].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -86,11 +88,11 @@ bool World::Init(){
 	//set texture for water
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/water2.dds", 0, 0, &mWaterTex, 0));
 
-	mSky = new Sky(md3dDevice, L"Textures/grasscube1024.dds", 100.0f);
+	mSky = new Sky(md3dDevice, L"Textures/desertcube1024.dds", 100.0f);
 
 	Terrain::InitInfo volcanoInitInfo;
 	volcanoInitInfo.HeightMapFilename = L"Textures/volcano_terrain_mask.dds";
-	volcanoInitInfo.LayerMapFilename0 = L"Textures/grass.dds";
+	volcanoInitInfo.LayerMapFilename0 = L"Textures/darkdirt.dds";
 	volcanoInitInfo.LayerMapFilename1 = L"Textures/darkdirt.dds";
 	volcanoInitInfo.LayerMapFilename2 = L"Textures/stone.dds";
 	volcanoInitInfo.LayerMapFilename3 = L"Textures/darkdirt.dds";
@@ -117,8 +119,13 @@ bool World::Init(){
 	mFlareTexSRV = d3dHelper::CreateTexture2DArraySRV(md3dDevice, md3dImmediateContext, flares);
 
 	//initialize fire
-	mFire.Init(md3dDevice, Effects::FireFX, mFlareTexSRV, mRandomTexSRV, 500);
-	mFire.SetEmitPos(XMFLOAT3(0.0f, 1.0f + moveUp[1], 0.0f));
+	for (int i = 0; i < numFires; i++)
+		volcanoFire[i].Init(md3dDevice, Effects::FireFX, mFlareTexSRV, mRandomTexSRV, 500);
+
+	float firePos[3] = { 47.0f, 9.7f + moveUp[1], -18.0f };
+	volcanoFire[0].SetEmitPos(XMFLOAT3(firePos[0], firePos[1], firePos[2]));
+	volcanoFire[1].SetEmitPos(XMFLOAT3(firePos[0] + 10.0f, firePos[1], firePos[2] - 10.0f ));
+	volcanoFire[2].SetEmitPos(XMFLOAT3(5.0f + firePos[0], firePos[1], firePos[2] - 5.0f));
 
 	//initialize rain
 	mRain.Init(md3dDevice, Effects::RainFX, mRainTexSRV, mRandomTexSRV, 10000);
@@ -144,22 +151,10 @@ void World::UpdateScene(float dt){
 	if (GetAsyncKeyState('D') & 0x8000)
 		mCam.Strafe(10.0f*dt);
 
-	// Walk/fly mode
-	if (GetAsyncKeyState('2') & 0x8000)
-		mWalkCamMode = true;
-	if (GetAsyncKeyState('3') & 0x8000)
-		mWalkCamMode = false;
-
-	// Clamp camera to terrain surface in walk mode.
-	if (mWalkCamMode){
-		XMFLOAT3 camPos = mCam.GetPosition();
-		float y = volcanoTerrain.GetHeight(camPos.x, camPos.z);
-		mCam.SetPosition(camPos.x, y + 2.0f, camPos.z);
-	}
-
 	// Reset particle systems.
 	if (GetAsyncKeyState('R') & 0x8000){
-		mFire.Reset();
+		for (int i = 0; i < numFires; i++)
+			volcanoFire[i].Reset();
 		mRain.Reset();
 	}
 
@@ -169,7 +164,8 @@ void World::UpdateScene(float dt){
 	XMMATRIX waterTexTranslate = XMMatrixTranslation(0.0f, mWaterTexAnimate.y, mWaterTexAnimate.x);
 	XMStoreFloat4x4(&mWaterTexTransform, waterTexTranslate);
 
-	mFire.Update(dt, mTimer.TotalTime());
+	for (int i = 0; i < numFires; i++)
+		volcanoFire[i].Update(dt, mTimer.TotalTime());
 	mRain.Update(dt, mTimer.TotalTime());
 
 	mCam.UpdateViewMatrix();
@@ -209,9 +205,12 @@ void World::DrawScene(){
 	mSky->Draw(md3dImmediateContext, mCam);
 
 	//draw fire particle system
-	mFire.SetEyePos(mCam.GetPosition());
-	mFire.Draw(md3dImmediateContext, mCam);
-	md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff); // restore default
+	for (int i = 0; i < numFires; i++){
+		volcanoFire[i].SetEyePos(mCam.GetPosition());
+		volcanoFire[i].Draw(md3dImmediateContext, mCam);
+	}
+
+	md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
 	
 	//draw rain particle system
 	mRain.SetEyePos(mCam.GetPosition());
