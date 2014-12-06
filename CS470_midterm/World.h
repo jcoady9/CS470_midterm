@@ -25,7 +25,7 @@ public:
 
 	void buildVertexAndIndexBuffers();
 	void initialTransformations();
-	void drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat);
+	void drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat, ID3D11ShaderResourceView* normalMap);
 
 	void OnMouseDown(WPARAM btnState, int x, int y);
 	void OnMouseUp(WPARAM btnState, int x, int y);
@@ -64,8 +64,9 @@ private:
 	ID3D11ShaderResourceView* mRainTexSRV;
 	ID3D11ShaderResourceView* mRandomTexSRV;
 
-	//normal map
+	//normal maps
 	ID3D11ShaderResourceView* mBrickNormalMap;
+	ID3D11ShaderResourceView* mWaterNormalMap;
 
 	//materials
 	Material mDirtMat;

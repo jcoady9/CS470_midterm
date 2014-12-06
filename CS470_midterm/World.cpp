@@ -3,7 +3,7 @@
 static float moveUp[3] = {0.0f, 20.0f, 00.f};
 
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
-mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0)
+mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0)
 {
 	mMainWndCaption = L"CS470 Midterm";
 	mEnable4xMsaa = false;
@@ -33,17 +33,7 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0)
 	mDirLights[0].Diffuse = XMFLOAT4(0.7f, 0.7f, 0.6f, 1.0f);
 	mDirLights[0].Specular = XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f);
 	mDirLights[0].Direction = XMFLOAT3(0.707f, 0.0f, 0.707f);
-	/*
-	mDirLights[1].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	mDirLights[1].Diffuse = XMFLOAT4(0.40f, 0.40f, 0.40f, 1.0f);
-	mDirLights[1].Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLights[1].Direction = XMFLOAT3(0.0f, -0.707f, 0.707f);
 
-	mDirLights[2].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	mDirLights[2].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLights[2].Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLights[2].Direction = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	*/
 	mDirtMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	mDirtMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mDirtMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
@@ -207,17 +197,12 @@ void World::DrawScene(){
 	Effects::DisplacementMapFX->SetMaxTessFactor(5.0f);
 
 	//draw each object
-	drawObject(mFloor, mDirtTex, mFloorTexTransform, mDirtMat);
-	drawObject(mWall, mBrickTex, mWallTexTransform, mBrickMat);
-	drawObject(mWall_2, mBrickTex, mWallTexTransform, mBrickMat);
-	drawObject(mWall_3, mBrickTex, mWallTexTransform, mBrickMat);
-	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat);
-	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat);
-
-	//md3dImmediateContext->HSSetShader(0, 0, 0);
-	//md3dImmediateContext->DSSetShader(0, 0, 0);
-
-	//md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	drawObject(mFloor, mDirtTex, mFloorTexTransform, mDirtMat, mBrickNormalMap);
+	drawObject(mWall, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
+	drawObject(mWall_2, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
+	drawObject(mWall_3, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
+	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
+	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat, mBrickNormalMap);
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -245,24 +230,13 @@ void World::DrawScene(){
 	HR(mSwapChain->Present(0, 0));
 }
 
-void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat){
-	//ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexFogTech;
-	//D3DX11_TECHNIQUE_DESC techDesc;
+void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat, ID3D11ShaderResourceView* normalMap){
+	ID3DX11EffectTechnique* activeTech = Effects::DisplacementMapFX->Light3TexFogTech;
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 	
 	// Set per object constants.
 	XMMATRIX world = XMLoadFloat4x4(&objWorld);
 	XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
-	/*
-	Effects::BasicFX->SetWorld(world);
-	Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
-	Effects::BasicFX->SetWorldViewProj(world * mCam.ViewProj());
-	Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&textureTransform));
-	Effects::BasicFX->SetMaterial(mat);
-	Effects::BasicFX->SetDiffuseMap(objTexture);
-	*/
-
-	ID3DX11EffectTechnique* activeTech = Effects::DisplacementMapFX->Light3TexFogTech;
-	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 	Effects::DisplacementMapFX->SetWorld(world);
 	Effects::DisplacementMapFX->SetWorldInvTranspose(worldInvTranspose);
@@ -271,7 +245,7 @@ void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTextur
 	Effects::DisplacementMapFX->SetTexTransform(XMLoadFloat4x4(&textureTransform));
 	Effects::DisplacementMapFX->SetMaterial(mat);
 	Effects::DisplacementMapFX->SetDiffuseMap(objTexture);
-	Effects::DisplacementMapFX->SetNormalMap(mBrickNormalMap);
+	Effects::DisplacementMapFX->SetNormalMap(normalMap);
 
 	activeTech->GetPassByIndex(0)->Apply(0, md3dImmediateContext);
 	md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
