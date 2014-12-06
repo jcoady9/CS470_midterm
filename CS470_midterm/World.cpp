@@ -3,7 +3,7 @@
 static float moveUp[3] = {0.0f, 20.0f, 00.f};
 
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
-mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
+mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0)
 {
 	mMainWndCaption = L"CS470 Midterm";
 	mEnable4xMsaa = false;
@@ -26,25 +26,24 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 	XMStoreFloat4x4(&mWallTexTransform, I);
 	XMStoreFloat4x4(&mWaterTexTransform, I);
 
+	//compute and set the transformations of stationary objects while initializing
 	initialTransformations();
 
-	mDirLights[0].Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	mDirLights[0].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mDirLights[0].Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[0].Diffuse = XMFLOAT4(0.7f, 0.7f, 0.6f, 1.0f);
 	mDirLights[0].Specular = XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f);
-	mDirLights[0].Direction = XMFLOAT3(0.707f, -0.707f, 0.0f);
-
-	
-
+	mDirLights[0].Direction = XMFLOAT3(0.707f, 0.0f, 0.707f);
+	/*
 	mDirLights[1].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	mDirLights[1].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[1].Diffuse = XMFLOAT4(0.40f, 0.40f, 0.40f, 1.0f);
 	mDirLights[1].Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLights[1].Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+	mDirLights[1].Direction = XMFLOAT3(0.0f, -0.707f, 0.707f);
 
 	mDirLights[2].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	mDirLights[2].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	mDirLights[2].Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLights[2].Direction = XMFLOAT3(-0.57735f, -0.57735f, -0.57735f);
-
+	mDirLights[2].Direction = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	*/
 	mDirtMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	mDirtMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mDirtMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
@@ -56,6 +55,7 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f)
 	mBrickMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	mBrickMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mBrickMat.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 16.0f);
+
 }
 
 World::~World(){
@@ -66,6 +66,7 @@ World::~World(){
 	ReleaseCOM(mRandomTexSRV);
 	ReleaseCOM(mFlareTexSRV);
 	ReleaseCOM(mRainTexSRV);
+	ReleaseCOM(mBrickNormalMap);
 	SafeDelete(mSky);
 	Effects::DestroyAll();
 	InputLayouts::DestroyAll();
@@ -87,6 +88,9 @@ bool World::Init(){
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/darkbrick.bmp", 0, 0, &mBrickTex, 0));
 	//set texture for water
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/water2.dds", 0, 0, &mWaterTex, 0));
+
+	//set normal map for brick shelter
+	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/brickNormalMap.dds", 0, 0, &mBrickNormalMap, 0));
 
 	mSky = new Sky(md3dDevice, L"Textures/desertcube1024.dds", 100.0f);
 
@@ -121,13 +125,13 @@ bool World::Init(){
 	//initialize fire
 	for (int i = 0; i < numFires; i++)
 		volcanoFire[i].Init(md3dDevice, Effects::FireFX, mFlareTexSRV, mRandomTexSRV, 500);
-
+	//set position for all the fires
 	float firePos[3] = { 47.0f, 9.7f + moveUp[1], -18.0f };
 	volcanoFire[0].SetEmitPos(XMFLOAT3(firePos[0], firePos[1], firePos[2]));
 	volcanoFire[1].SetEmitPos(XMFLOAT3(firePos[0] + 10.0f, firePos[1], firePos[2] - 10.0f ));
 	volcanoFire[2].SetEmitPos(XMFLOAT3(5.0f + firePos[0], firePos[1], firePos[2] - 5.0f));
 
-	//initialize rain
+	//initialize raining fire
 	mRain.Init(md3dDevice, Effects::RainFX, mRainTexSRV, mRandomTexSRV, 10000);
 
 	buildVertexAndIndexBuffers();
@@ -175,20 +179,32 @@ void World::DrawScene(){
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	md3dImmediateContext->IASetInputLayout(InputLayouts::Basic32);
+	md3dImmediateContext->IASetInputLayout(InputLayouts::PosNormalTexTan);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	UINT stride = sizeof(Vertex::Basic32);
+	UINT stride = sizeof(Vertex::PosNormalTexTan);
 	UINT offset = 0;
 
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	Effects::BasicFX->SetDirLights(mDirLights);
-	Effects::BasicFX->SetEyePosW(mCam.GetPosition());
-	Effects::BasicFX->SetFogColor(Colors::Silver);
-	Effects::BasicFX->SetFogStart(3.0f);
-	Effects::BasicFX->SetFogRange(50.0f);
+	//set basic effects
+	Effects::DisplacementMapFX->SetDirLights(mDirLights);
+	Effects::DisplacementMapFX->SetEyePosW(mCam.GetPosition());
+	Effects::DisplacementMapFX->SetFogColor(Colors::Silver);
+	Effects::DisplacementMapFX->SetFogStart(3.0f);
+	Effects::DisplacementMapFX->SetFogRange(75.0f);
+
+	//set displacement map effects
+	Effects::DisplacementMapFX->SetDirLights(mDirLights);
+	Effects::DisplacementMapFX->SetEyePosW(mCam.GetPosition());
+	Effects::DisplacementMapFX->SetCubeMap(mSky->CubeMapSRV());
+
+	Effects::DisplacementMapFX->SetHeightScale(0.05f);
+	Effects::DisplacementMapFX->SetMaxTessDistance(1.0f);
+	Effects::DisplacementMapFX->SetMinTessDistance(5.0f);
+	Effects::DisplacementMapFX->SetMinTessFactor(1.0f);
+	Effects::DisplacementMapFX->SetMaxTessFactor(5.0f);
 
 	//draw each object
 	drawObject(mFloor, mDirtTex, mFloorTexTransform, mDirtMat);
@@ -197,6 +213,11 @@ void World::DrawScene(){
 	drawObject(mWall_3, mBrickTex, mWallTexTransform, mBrickMat);
 	drawObject(mWall_4, mBrickTex, mWallTexTransform, mBrickMat);
 	drawObject(mWater, mWaterTex, mWaterTexTransform, mWaterMat);
+
+	//md3dImmediateContext->HSSetShader(0, 0, 0);
+	//md3dImmediateContext->DSSetShader(0, 0, 0);
+
+	//md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -225,19 +246,32 @@ void World::DrawScene(){
 }
 
 void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat){
-	ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexFogTech;
-	D3DX11_TECHNIQUE_DESC techDesc;
+	//ID3DX11EffectTechnique* activeTech = Effects::BasicFX->Light3TexFogTech;
+	//D3DX11_TECHNIQUE_DESC techDesc;
 	
 	// Set per object constants.
 	XMMATRIX world = XMLoadFloat4x4(&objWorld);
 	XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(world);
-
+	/*
 	Effects::BasicFX->SetWorld(world);
 	Effects::BasicFX->SetWorldInvTranspose(worldInvTranspose);
 	Effects::BasicFX->SetWorldViewProj(world * mCam.ViewProj());
 	Effects::BasicFX->SetTexTransform(XMLoadFloat4x4(&textureTransform));
 	Effects::BasicFX->SetMaterial(mat);
 	Effects::BasicFX->SetDiffuseMap(objTexture);
+	*/
+
+	ID3DX11EffectTechnique* activeTech = Effects::DisplacementMapFX->Light3TexFogTech;
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+
+	Effects::DisplacementMapFX->SetWorld(world);
+	Effects::DisplacementMapFX->SetWorldInvTranspose(worldInvTranspose);
+	Effects::DisplacementMapFX->SetViewProj(mCam.ViewProj());
+	Effects::DisplacementMapFX->SetWorldViewProj(world * mCam.ViewProj());
+	Effects::DisplacementMapFX->SetTexTransform(XMLoadFloat4x4(&textureTransform));
+	Effects::DisplacementMapFX->SetMaterial(mat);
+	Effects::DisplacementMapFX->SetDiffuseMap(objTexture);
+	Effects::DisplacementMapFX->SetNormalMap(mBrickNormalMap);
 
 	activeTech->GetPassByIndex(0)->Apply(0, md3dImmediateContext);
 	md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
@@ -261,18 +295,19 @@ void World::buildVertexAndIndexBuffers(){
 
 	// Extract the vertex elements we are interested in and pack the
 	// vertices of all the meshes into one vertex buffer.
-	std::vector<Vertex::Basic32> vertices(totalVertexCount);
+	std::vector<Vertex::PosNormalTexTan> vertices(totalVertexCount);
 
 	UINT k = 0;
 	for (size_t i = 0; i < floor.Vertices.size(); ++i, ++k){
 		vertices[k].Pos = floor.Vertices[i].Position;
 		vertices[k].Normal = floor.Vertices[i].Normal;
 		vertices[k].Tex = floor.Vertices[i].TexC;
+		//vertices[k].TangentU = floor.Vertices[i].TangentU;
 	}
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex::Basic32) * totalVertexCount;
+	vbd.ByteWidth = sizeof(Vertex::PosNormalTexTan) * totalVertexCount;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;

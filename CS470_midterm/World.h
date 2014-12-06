@@ -64,6 +64,10 @@ private:
 	ID3D11ShaderResourceView* mRainTexSRV;
 	ID3D11ShaderResourceView* mRandomTexSRV;
 
+	//normal map
+	ID3D11ShaderResourceView* mBrickNormalMap;
+
+	//materials
 	Material mDirtMat;
 	Material mBrickMat;
 	Material mWaterMat;

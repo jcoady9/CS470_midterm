@@ -34,6 +34,14 @@ namespace Vertex
 		float Age;
 		unsigned int Type;
 	};
+
+	struct PosNormalTexTan
+	{
+		XMFLOAT3 Pos;
+		XMFLOAT3 Normal;
+		XMFLOAT2 Tex;
+		XMFLOAT3 TangentU;
+	};
 }
 
 class InputLayoutDesc
@@ -44,6 +52,7 @@ public:
 	static const D3D11_INPUT_ELEMENT_DESC Basic32[3];
 	static const D3D11_INPUT_ELEMENT_DESC Terrain[3];
 	static const D3D11_INPUT_ELEMENT_DESC Particle[5];
+	static const D3D11_INPUT_ELEMENT_DESC PosNormalTexTan[4];
 };
 
 class InputLayouts
@@ -56,6 +65,7 @@ public:
 	static ID3D11InputLayout* Basic32;
 	static ID3D11InputLayout* Terrain;
 	static ID3D11InputLayout* Particle;
+	static ID3D11InputLayout* PosNormalTexTan;
 };
 
 #endif // VERTEX_H
