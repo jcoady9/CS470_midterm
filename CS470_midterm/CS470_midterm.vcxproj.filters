@@ -160,6 +160,12 @@
     <None Include="FX\Terrain.fxo">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="FX\NormalMap.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="FX\DisplacementMap.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\meshfx.fx">
@@ -181,6 +187,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="FX\Terrain.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\NormalMap.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\DisplacementMap.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

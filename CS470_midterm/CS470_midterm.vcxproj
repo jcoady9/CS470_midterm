@@ -116,7 +116,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FX\Basic.fxo" />
+    <None Include="FX\DisplacementMap.fxo" />
     <None Include="FX\Fire.fxo" />
+    <None Include="FX\NormalMap.fxo" />
     <None Include="FX\Rain.fxo" />
     <None Include="FX\Sky.fxo" />
     <None Include="FX\Terrain.fxo" />
@@ -125,9 +127,11 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\Basic.fx" />
+    <FxCompile Include="FX\DisplacementMap.fx" />
     <FxCompile Include="FX\Fire.fx" />
     <FxCompile Include="FX\LightHelper.fx" />
     <FxCompile Include="FX\meshfx.fx" />
+    <FxCompile Include="FX\NormalMap.fx" />
     <FxCompile Include="FX\Rain.fx" />
     <FxCompile Include="FX\Sky.fx" />
     <FxCompile Include="FX\Terrain.fx" />
