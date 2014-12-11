@@ -1,6 +1,8 @@
 #include "World.h"
 
 static float moveUp[3] = {0.0f, 20.0f, 00.f};
+UINT stride = sizeof(Vertex::PosNormalTexTan);
+UINT offset = 0;
 
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
 mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0), mVertexLayout(0), mSmap(0)
@@ -202,8 +204,7 @@ void World::DrawScene(){
 		mTable.MeshData.Draw(md3dImmediateContext, subset);
 	} 
 
-	UINT stride = sizeof(Vertex::PosNormalTexTan);
-	UINT offset = 0;
+
 
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -462,10 +463,14 @@ void World::drawShadowMap()
 	Effects::BuildShadowMapFX->SetMinTessFactor(1.0f);
 	Effects::BuildShadowMapFX->SetMaxTessFactor(5.0f);
 
+	md3dImmediateContext->IASetInputLayout(InputLayouts::PosNormalTexTan);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
 	//ID3DX11EffectTechnique* smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
-	drawObjectShadow(mWall_4, mWallTexTransform);
+	drawObjectShadow(mFloor, mFloorTexTransform);
 
 
 }
