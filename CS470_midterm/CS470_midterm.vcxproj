@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\..\3DGameProgramming\Common\Waves.cpp" />
     <ClCompile Include="..\..\..\3DGameProgramming\Common\xnacollision.cpp" />
     <ClCompile Include="Effects.cpp" />
+    <ClCompile Include="M3DMesh.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshGeometry.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
@@ -106,6 +107,7 @@
     <ClInclude Include="..\..\..\3DGameProgramming\Common\Waves.h" />
     <ClInclude Include="..\..\..\3DGameProgramming\Common\xnacollision.h" />
     <ClInclude Include="Effects.h" />
+    <ClInclude Include="M3DMesh.h" />
     <ClInclude Include="MeshGeometry.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="RenderStates.h" />

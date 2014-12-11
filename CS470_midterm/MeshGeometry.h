@@ -28,11 +28,8 @@ public:
 
 	template <typename VertexType>
 	void SetVertices(ID3D11Device* device, const VertexType* vertices, UINT count);
-
 	void SetIndices(ID3D11Device* device, const USHORT* indices, UINT count);
-
 	void SetSubsetTable(std::vector<Subset>& subsetTable);
-
 	void Draw(ID3D11DeviceContext* dc, UINT subsetId);
 
 private:
