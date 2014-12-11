@@ -100,6 +100,9 @@ BasicEffect::BasicEffect(ID3D11Device* device, const std::wstring& filename)
 	Mat               = mFX->GetVariableByName("gMaterial");
 	DiffuseMap        = mFX->GetVariableByName("gDiffuseMap")->AsShaderResource();
 	CubeMap           = mFX->GetVariableByName("gCubeMap")->AsShaderResource();
+
+	ShadowTransform = mFX->GetVariableByName("gShadowTransform")->AsMatrix();
+
 }
 
 BasicEffect::~BasicEffect()
@@ -273,6 +276,36 @@ DisplacementMapEffect::~DisplacementMapEffect()
 }
 #pragma endregion
 
+#pragma region BuildShadowMapEffect
+BuildShadowMapEffect::BuildShadowMapEffect(ID3D11Device* device, const std::wstring& filename)
+: Effect(device, filename)
+{
+	BuildShadowMapTech = mFX->GetTechniqueByName("BuildShadowMapTech");
+	BuildShadowMapAlphaClipTech = mFX->GetTechniqueByName("BuildShadowMapAlphaClipTech");
+
+	TessBuildShadowMapTech = mFX->GetTechniqueByName("TessBuildShadowMapTech");
+	TessBuildShadowMapAlphaClipTech = mFX->GetTechniqueByName("TessBuildShadowMapAlphaClipTech");
+
+	ViewProj = mFX->GetVariableByName("gViewProj")->AsMatrix();
+	WorldViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
+	World = mFX->GetVariableByName("gWorld")->AsMatrix();
+	WorldInvTranspose = mFX->GetVariableByName("gWorldInvTranspose")->AsMatrix();
+	TexTransform = mFX->GetVariableByName("gTexTransform")->AsMatrix();
+	EyePosW = mFX->GetVariableByName("gEyePosW")->AsVector();
+	HeightScale = mFX->GetVariableByName("gHeightScale")->AsScalar();
+	MaxTessDistance = mFX->GetVariableByName("gMaxTessDistance")->AsScalar();
+	MinTessDistance = mFX->GetVariableByName("gMinTessDistance")->AsScalar();
+	MinTessFactor = mFX->GetVariableByName("gMinTessFactor")->AsScalar();
+	MaxTessFactor = mFX->GetVariableByName("gMaxTessFactor")->AsScalar();
+	DiffuseMap = mFX->GetVariableByName("gDiffuseMap")->AsShaderResource();
+	NormalMap = mFX->GetVariableByName("gNormalMap")->AsShaderResource();
+}
+
+BuildShadowMapEffect::~BuildShadowMapEffect()
+{
+}
+#pragma endregion
+
 #pragma region SkyEffect
 SkyEffect::SkyEffect(ID3D11Device* device, const std::wstring& filename)
 	: Effect(device, filename)
@@ -356,6 +389,7 @@ SkyEffect*             Effects::SkyFX             = 0;
 TerrainEffect* Effects::TerrainFX = 0;
 ParticleEffect* Effects::FireFX = 0;
 ParticleEffect* Effects::RainFX = 0;
+BuildShadowMapEffect* Effects::BuildShadowMapFX = 0;
 
 void Effects::InitAll(ID3D11Device* device)
 {
@@ -366,6 +400,7 @@ void Effects::InitAll(ID3D11Device* device)
 	TerrainFX = new TerrainEffect(device, L"FX/Terrain.fxo");
 	FireFX = new ParticleEffect(device, L"FX/Fire.fxo");
 	RainFX = new ParticleEffect(device, L"FX/Rain.fxo");
+	BuildShadowMapFX = new BuildShadowMapEffect(device, L"FX/BuildShadowMap.fxo");
 }
 
 void Effects::DestroyAll()
@@ -377,6 +412,7 @@ void Effects::DestroyAll()
 	SafeDelete(TerrainFX);
 	SafeDelete(FireFX);
 	SafeDelete(RainFX);
+	SafeDelete(BuildShadowMapFX);
 }
 
 #pragma endregion

@@ -1,6 +1,5 @@
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\vc120.pdb
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\vc120.idb
-c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\camera.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\d3dapp.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\d3dutil.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\gametimer.obj
@@ -16,11 +15,14 @@ c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\meshgeometry.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\particlesystem.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\renderstates.obj
+c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\shadowmap.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\sky.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\terrain.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\vertex.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\world.obj
+c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\cs470_midterm\debug\camera.obj
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\debug\basic.cso
+c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\debug\buildshadowmap.cso
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\debug\displacementmap.cso
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\debug\fire.cso
 c:\users\josh\documents\visual studio 2013\projects\cs470_midterm\debug\lighthelper.cso

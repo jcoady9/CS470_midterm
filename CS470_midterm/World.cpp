@@ -3,7 +3,7 @@
 static float moveUp[3] = {0.0f, 20.0f, 00.f};
 
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
-mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0), mVertexLayout(0)
+mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0), mVertexLayout(0), mSmap(0)
 {
 	mMainWndCaption = L"CS470 Midterm";
 	mEnable4xMsaa = false;
@@ -60,6 +60,7 @@ World::~World(){
 	ReleaseCOM(mFX);
 	ReleaseCOM(mVertexLayout);
 	SafeDelete(mSky);
+	SafeDelete(mSmap);
 	Effects::DestroyAll();
 	InputLayouts::DestroyAll();
 	RenderStates::DestroyAll();
@@ -85,6 +86,8 @@ bool World::Init(){
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/brickNormalMap.dds", 0, 0, &mBrickNormalMap, 0));
 
 	mTable.Init(md3dDevice, "Meshes/table.m3d");
+
+	mSmap = new ShadowMap(md3dDevice, SMapSize, SMapSize);
 
 	mSky = new Sky(md3dDevice, L"Textures/desertcube1024.dds", 100.0f);
 
@@ -167,14 +170,27 @@ void World::UpdateScene(float dt){
 		volcanoFire[i].Update(dt, mTimer.TotalTime());
 	mRain.Update(dt, mTimer.TotalTime());
 
+	//buildShadow();
+
 	mCam.UpdateViewMatrix();
 }
 
 void World::DrawScene(){
+
+	mSmap->BindDsvAndSetNullRenderTarget(md3dImmediateContext);
+
+	//drawShadowMap();
+
+	ID3D11RenderTargetView* renderTargets[1] = { mRenderTargetView };
+	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
+	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
+
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	XMMATRIX shadowTransform = XMLoadFloat4x4(&mShadowTransform);
 
 	//draw mesh table
 	mFXMatVar->SetMatrix(reinterpret_cast<float*>(&mCam.ViewProj()));
@@ -238,6 +254,9 @@ void World::DrawScene(){
 	// restore default states.
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactor, 0xffffffff);
+
+	ID3D11ShaderResourceView* nullSRV[16] = { 0 };
+	md3dImmediateContext->PSSetShaderResources(0, 16, nullSRV);
 	
 	HR(mSwapChain->Present(0, 0));
 }
@@ -407,6 +426,69 @@ void World::buildVertexLayouts(){
 	D3DX11_PASS_DESC pd;
 	mTech->GetPassByIndex(0)->GetDesc(&pd);
 	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, pd.pIAInputSignature, pd.IAInputSignatureSize, &mVertexLayout));
+}
+
+void World::drawShadowMap()
+{
+	XMMATRIX view = XMLoadFloat4x4(&mLightView);
+	XMMATRIX proj = XMLoadFloat4x4(&mLightProj);
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
+	Effects::BuildShadowMapFX->SetEyePosW(mCam.GetPosition());
+	Effects::BuildShadowMapFX->SetViewProj(viewProj);
+
+	// These properties could be set per object if needed.
+	Effects::BuildShadowMapFX->SetHeightScale(0.07f);
+	Effects::BuildShadowMapFX->SetMaxTessDistance(1.0f);
+	Effects::BuildShadowMapFX->SetMinTessDistance(25.0f);
+	Effects::BuildShadowMapFX->SetMinTessFactor(1.0f);
+	Effects::BuildShadowMapFX->SetMaxTessFactor(5.0f);
+
+	ID3DX11EffectTechnique* tessSmapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
+	ID3DX11EffectTechnique* smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
+
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+	smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
+	tessSmapTech = Effects::BuildShadowMapFX->TessBuildShadowMapTech;
+
+
+}
+
+void World::buildShadow()
+{
+	// Only the first "main" light casts a shadow.
+	XMVECTOR lightDir = XMLoadFloat3(&mDirLights[0].Direction);
+	XMVECTOR lightPos = -2.0f*mSceneBounds.Radius*lightDir;
+	XMVECTOR targetPos = XMLoadFloat3(&mSceneBounds.Center);
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMMATRIX V = XMMatrixLookAtLH(lightPos, targetPos, up);
+
+	// Transform bounding sphere to light space.
+	XMFLOAT3 sphereCenterLS;
+	XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, V));
+
+	// Ortho frustum in light space encloses scene.
+	float l = sphereCenterLS.x - mSceneBounds.Radius;
+	float b = sphereCenterLS.y - mSceneBounds.Radius;
+	float n = sphereCenterLS.z - mSceneBounds.Radius;
+	float r = sphereCenterLS.x + mSceneBounds.Radius;
+	float t = sphereCenterLS.y + mSceneBounds.Radius;
+	float f = sphereCenterLS.z + mSceneBounds.Radius;
+	XMMATRIX P = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	XMMATRIX T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMMATRIX S = V*P*T;
+
+	XMStoreFloat4x4(&mLightView, V);
+	XMStoreFloat4x4(&mLightProj, P);
+	XMStoreFloat4x4(&mShadowTransform, S);
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y){

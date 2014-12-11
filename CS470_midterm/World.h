@@ -11,6 +11,7 @@
 #include "Terrain.h"
 #include "ParticleSystem.h"
 #include "M3DMesh.h"
+#include "ShadowMap.h"
 
 #define NUMFIRES 3
 
@@ -29,6 +30,8 @@ public:
 	void drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat, ID3D11ShaderResourceView* normalMap);
 	void buildMeshFX();
 	void buildVertexLayouts();
+	void drawShadowMap();
+	void buildShadow();
 
 	void OnMouseDown(WPARAM btnState, int x, int y);
 	void OnMouseUp(WPARAM btnState, int x, int y);
@@ -77,6 +80,14 @@ private:
 	ID3DX11EffectTechnique* mTech;
 	ID3DX11EffectMatrixVariable* mFXMatVar;
 	ID3D11InputLayout* mVertexLayout;
+
+	BoundingSphere mSceneBounds;
+
+	static const int SMapSize = 2048;
+	ShadowMap* mSmap;
+	XMFLOAT4X4 mLightView;
+	XMFLOAT4X4 mLightProj;
+	XMFLOAT4X4 mShadowTransform;
 
 	//materials
 	Material mDirtMat;

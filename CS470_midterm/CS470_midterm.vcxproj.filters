@@ -81,6 +81,9 @@
     <ClCompile Include="M3DMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="World.h">
@@ -143,6 +146,9 @@
     <ClInclude Include="M3DMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Meshes\chair.m3d">
@@ -172,6 +178,9 @@
     <None Include="FX\DisplacementMap.fxo">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="FX\BuildShadowMap.fxo">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\meshfx.fx">
@@ -199,6 +208,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="FX\DisplacementMap.fx">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\BuildShadowMap.fx">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
