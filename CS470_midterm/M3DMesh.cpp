@@ -4,8 +4,7 @@
 M3DMesh::M3DMesh()
 {
 	// Initialize local transformation to identity
-	XMMATRIX Ident = XMMatrixIdentity();
-	XMStoreFloat4x4(&World, Ident);
+	XMStoreFloat4x4(&World, XMMatrixIdentity());
 }
 
 M3DMesh::M3DMesh(ID3D11Device* device, const std::string& modelFilename)

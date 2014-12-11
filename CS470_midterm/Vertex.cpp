@@ -39,11 +39,7 @@ const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::PosNormalTexTan[4] =
 	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
-const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::vertexDesc[2] =
-{
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-};
+
 
 #pragma endregion
 
@@ -54,7 +50,6 @@ ID3D11InputLayout* InputLayouts::Basic32 = 0;
 ID3D11InputLayout* InputLayouts::Terrain = 0;
 ID3D11InputLayout* InputLayouts::Particle = 0;
 ID3D11InputLayout* InputLayouts::PosNormalTexTan = 0;
-ID3D11InputLayout* InputLayouts::vertexDesc = 0;
 
 void InputLayouts::InitAll(ID3D11Device* device)
 {

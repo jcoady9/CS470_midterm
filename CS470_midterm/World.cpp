@@ -3,7 +3,7 @@
 static float moveUp[3] = {0.0f, 20.0f, 00.f};
 
 World::World(HINSTANCE hInstance) : D3DApp(hInstance), mSky(0), mDirtTex(0), mBrickTex(0), mWaterTex(0), mRandomTexSRV(0), mFlareTexSRV(0), mRainTexSRV(0), 
-mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0)
+mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNormalMap(0), mVertexLayout(0)
 {
 	mMainWndCaption = L"CS470 Midterm";
 	mEnable4xMsaa = false;
@@ -57,6 +57,8 @@ World::~World(){
 	ReleaseCOM(mFlareTexSRV);
 	ReleaseCOM(mRainTexSRV);
 	ReleaseCOM(mBrickNormalMap);
+	ReleaseCOM(mFX);
+	ReleaseCOM(mVertexLayout);
 	SafeDelete(mSky);
 	Effects::DestroyAll();
 	InputLayouts::DestroyAll();
@@ -81,6 +83,8 @@ bool World::Init(){
 
 	//set normal map for brick shelter
 	HR(D3DX11CreateShaderResourceViewFromFile(md3dDevice, L"Textures/brickNormalMap.dds", 0, 0, &mBrickNormalMap, 0));
+
+	mTable.Init(md3dDevice, "Meshes/table.m3d");
 
 	mSky = new Sky(md3dDevice, L"Textures/desertcube1024.dds", 100.0f);
 
@@ -124,6 +128,7 @@ bool World::Init(){
 	//initialize raining fire
 	mRain.Init(md3dDevice, Effects::RainFX, mRainTexSRV, mRandomTexSRV, 10000);
 
+	buildMeshFX();
 	buildVertexAndIndexBuffers();
 
 	return true;
@@ -169,8 +174,14 @@ void World::DrawScene(){
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	md3dImmediateContext->IASetInputLayout(InputLayouts::PosNormalTexTan);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//draw mesh table
+	mFXMatVar->SetMatrix(reinterpret_cast<float*>(&mCam.ViewProj()));
+	for (UINT subset = 0; subset < mTable.SubsetCount; ++subset){
+		mTech->GetPassByIndex(0)->Apply(0, md3dImmediateContext);
+		mTable.MeshData.Draw(md3dImmediateContext, subset);
+	} 
 
 	UINT stride = sizeof(Vertex::PosNormalTexTan);
 	UINT offset = 0;
@@ -196,7 +207,8 @@ void World::DrawScene(){
 	Effects::DisplacementMapFX->SetMinTessFactor(1.0f);
 	Effects::DisplacementMapFX->SetMaxTessFactor(5.0f);
 
-	//draw each object
+	md3dImmediateContext->IASetInputLayout(InputLayouts::PosNormalTexTan);
+
 	drawObject(mFloor, mDirtTex, mFloorTexTransform, mDirtMat, mBrickNormalMap);
 	drawObject(mWall, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
 	drawObject(mWall_2, mBrickTex, mWallTexTransform, mBrickMat, mBrickNormalMap);
@@ -350,6 +362,51 @@ void World::initialTransformations(){
 	translate = XMMatrixTranslation(0.0f, -20.0f, 0.0f);
 	volcanoTerrain.SetWorld(translate);
 
+	translate = XMMatrixTranslation(0.0f, moveUp[1] + 5.0f, 0.0f);
+	axis = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	rotate = XMMatrixRotationAxis(axis, 1.57f);
+	XMStoreFloat4x4(&mTable.World, translate * rotate);
+
+}
+
+void World::buildMeshFX()
+{
+	// Set shader flags
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) | defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	//TODO: Create shader
+	// Load effects file
+	ID3D10Blob* shader = 0;
+	ID3D10Blob* compilationErrors = 0;
+	HR(D3DX11CompileFromFile(L"FX/meshfx.fx", 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &shader, &compilationErrors, 0));
+
+	// TODO: Create effect from shader
+	HR(D3DX11CreateEffectFromMemory(shader->GetBufferPointer(), shader->GetBufferSize(), 0, md3dDevice, &mFX));
+	ReleaseCOM(shader);
+
+	// TODO: Set technique and associate variables
+	// Get technique from effect
+	mTech = mFX->GetTechniqueByName("BasicTech");
+
+	// Associate modelview-projection shader variable
+	mFXMatVar = mFX->GetVariableByName("gWVP")->AsMatrix();
+}
+
+void World::buildVertexLayouts(){
+
+	const D3D11_INPUT_ELEMENT_DESC vertexDesc[2] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	D3DX11_PASS_DESC pd;
+	mTech->GetPassByIndex(0)->GetDesc(&pd);
+	HR(md3dDevice->CreateInputLayout(vertexDesc, 2, pd.pIAInputSignature, pd.IAInputSignatureSize, &mVertexLayout));
 }
 
 void World::OnMouseDown(WPARAM btnState, int x, int y){

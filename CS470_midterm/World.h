@@ -10,6 +10,7 @@
 #include "Sky.h"
 #include "Terrain.h"
 #include "ParticleSystem.h"
+#include "M3DMesh.h"
 
 #define NUMFIRES 3
 
@@ -26,6 +27,8 @@ public:
 	void buildVertexAndIndexBuffers();
 	void initialTransformations();
 	void drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTexture, XMFLOAT4X4& textureTransform, Material& mat, ID3D11ShaderResourceView* normalMap);
+	void buildMeshFX();
+	void buildVertexLayouts();
 
 	void OnMouseDown(WPARAM btnState, int x, int y);
 	void OnMouseUp(WPARAM btnState, int x, int y);
@@ -67,6 +70,13 @@ private:
 	//normal maps
 	ID3D11ShaderResourceView* mBrickNormalMap;
 	ID3D11ShaderResourceView* mWaterNormalMap;
+
+	//mesh effects 
+	M3DMesh mTable;
+	ID3DX11Effect* mFX;
+	ID3DX11EffectTechnique* mTech;
+	ID3DX11EffectMatrixVariable* mFXMatVar;
+	ID3D11InputLayout* mVertexLayout;
 
 	//materials
 	Material mDirtMat;

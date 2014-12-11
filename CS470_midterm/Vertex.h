@@ -59,7 +59,6 @@ public:
 	static const D3D11_INPUT_ELEMENT_DESC Terrain[3];
 	static const D3D11_INPUT_ELEMENT_DESC Particle[5];
 	static const D3D11_INPUT_ELEMENT_DESC PosNormalTexTan[4];
-	static const D3D11_INPUT_ELEMENT_DESC vertexDesc[2];
 };
 
 class InputLayouts
@@ -73,7 +72,6 @@ public:
 	static ID3D11InputLayout* Terrain;
 	static ID3D11InputLayout* Particle;
 	static ID3D11InputLayout* PosNormalTexTan;
-	static ID3D11InputLayout* vertexDesc;
 
 };
 
