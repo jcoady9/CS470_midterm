@@ -15,6 +15,9 @@ mWalkCamMode(false), mWaterTexAnimate(0.0f, 0.0f), mBrickNormalMap(0), mWaterNor
 	XMFLOAT3 target = XMFLOAT3(0.0f, moveUp[1], 0.0f);
 	mCam.LookAt(mCam.GetPosition(), target, mCam.GetUp());
 
+	mSceneBounds.Center = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	mSceneBounds.Radius = sqrtf(10.0f*10.0f + 15.0f*15.0f);
+
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mFloor, I);
 	XMStoreFloat4x4(&mWall, I);
@@ -170,7 +173,7 @@ void World::UpdateScene(float dt){
 		volcanoFire[i].Update(dt, mTimer.TotalTime());
 	mRain.Update(dt, mTimer.TotalTime());
 
-	//buildShadow();
+	buildShadow();
 
 	mCam.UpdateViewMatrix();
 }
@@ -179,7 +182,7 @@ void World::DrawScene(){
 
 	mSmap->BindDsvAndSetNullRenderTarget(md3dImmediateContext);
 
-	//drawShadowMap();
+	drawShadowMap();
 
 	ID3D11RenderTargetView* renderTargets[1] = { mRenderTargetView };
 	md3dImmediateContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
@@ -204,6 +207,8 @@ void World::DrawScene(){
 
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+
 
 	//set basic effects
 	Effects::DisplacementMapFX->SetDirLights(mDirLights);
@@ -279,6 +284,19 @@ void World::drawObject(XMFLOAT4X4& objWorld, ID3D11ShaderResourceView* objTextur
 	Effects::DisplacementMapFX->SetNormalMap(normalMap);
 
 	activeTech->GetPassByIndex(0)->Apply(0, md3dImmediateContext);
+	md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
+}
+
+void World::drawObjectShadow(XMFLOAT4X4& objWorld, XMFLOAT4X4& textureTransform){
+	ID3DX11EffectTechnique* tessSmapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
+	XMMATRIX worldInvTranspose = MathHelper::InverseTranspose(XMLoadFloat4x4(&objWorld));
+
+	Effects::BuildShadowMapFX->SetWorld(XMLoadFloat4x4(&objWorld));
+	Effects::BuildShadowMapFX->SetWorldInvTranspose(worldInvTranspose);
+	Effects::BuildShadowMapFX->SetWorldViewProj(XMLoadFloat4x4(&objWorld) * mCam.ViewProj());
+	Effects::BuildShadowMapFX->SetTexTransform(XMLoadFloat4x4(&textureTransform));
+
+	tessSmapTech->GetPassByIndex(0)->Apply(0, md3dImmediateContext);
 	md3dImmediateContext->DrawIndexed(mBoxIndexCount, 0, 0);
 }
 
@@ -444,12 +462,10 @@ void World::drawShadowMap()
 	Effects::BuildShadowMapFX->SetMinTessFactor(1.0f);
 	Effects::BuildShadowMapFX->SetMaxTessFactor(5.0f);
 
-	ID3DX11EffectTechnique* tessSmapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
-	ID3DX11EffectTechnique* smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
-
+	//ID3DX11EffectTechnique* smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-	smapTech = Effects::BuildShadowMapFX->BuildShadowMapTech;
-	tessSmapTech = Effects::BuildShadowMapFX->TessBuildShadowMapTech;
+
+	drawObjectShadow(mWall_4, mWallTexTransform);
 
 
 }

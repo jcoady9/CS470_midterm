@@ -32,6 +32,7 @@ public:
 	void buildVertexLayouts();
 	void drawShadowMap();
 	void buildShadow();
+	void drawObjectShadow(XMFLOAT4X4& objWorld, XMFLOAT4X4& textureTransform);
 
 	void OnMouseDown(WPARAM btnState, int x, int y);
 	void OnMouseUp(WPARAM btnState, int x, int y);
